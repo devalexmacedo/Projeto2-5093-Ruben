@@ -17,7 +17,7 @@ private:
 
 public:
     // Construtor padrão
-    Venda();
+    Venda();-
 
     // Construtor com parâmetros básicos
     Venda(int numeroFatura, int numeroCliente, const char* data);
