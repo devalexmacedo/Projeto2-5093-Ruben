@@ -1,3 +1,4 @@
+// Venda.h - Definição da classe Venda
 #pragma once
 
 class Venda {
@@ -20,32 +21,34 @@ public:
     Venda();
 
     // Construtor com parâmetros básicos
-    Venda(int numeroFatura, int numeroCliente, const char* data);
+    Venda(int numeroFatura, int numeroCliente, char* data);
 
     // Métodos de acesso (getters)
-    int getNumeroFatura() const;
-    int getNumeroCliente() const;
-    int getNumItens() const;
-    double getTotalComIVA() const;
-    const char* getData() const;
+    int getNumeroFatura();
+    int getNumeroCliente();
+    int getNumItens();
+    double getTotalComIVA();
+    char* getData();
 
     // Métodos de modificação (setters)
     void setNumeroFatura(int numeroFatura);
     void setNumeroCliente(int numeroCliente);
-    void setData(const char* data);
+    void setData(char* data);
 
     // Métodos adicionais
-    void adicionarItem(int linha, const char* nomeProduto, int quantidade, double precoSemIVA);
+    void adicionarItem(int linha, char* nomeProduto, int quantidade, double precoSemIVA);
     void calcularTotal();
     void processarPagamento(double valorEntregue);
-    void imprimirTalao() const;
+    void imprimirTalao();
+    bool checkout(); // Nova função de checkout
 
     // Métodos para acesso aos itens
-    int getLinha(int indice) const;
-    const char* getNomeProduto(int indice) const;
-    int getQuantidade(int indice) const;
-    double getPrecoSemIVA(int indice) const;
-    double getIVA(int indice) const;
-    double getValorEntregue() const;
-    double getTroco() const;
+    int getLinha(int indice);
+    char* getNomeProduto(int indice);
+    int getQuantidade(int indice);
+    double getPrecoSemIVA(int indice);
+    double getIVA(int indice);
+    double getValorEntregue();
+    double getTroco();
 };
+

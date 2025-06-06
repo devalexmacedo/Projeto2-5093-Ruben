@@ -1,3 +1,4 @@
+// Loja.h - Definição da classe Loja
 #pragma once
 
 #include "Produto.h"
@@ -6,9 +7,9 @@
 
 class Loja {
 private:
-    Produto produtos[100];      // Vetor de produtos
-    Cliente clientes[100];      // Vetor de clientes
-    Venda vendas[100];          // Vetor de vendas (limitado a 100)
+    Produto produtos[100];      // Array de produtos
+    Cliente clientes[100];      // Array de clientes
+    Venda vendas[100];          // Array de vendas (limitado a 100)
     int numProdutos;            // Número atual de produtos
     int numClientes;            // Número atual de clientes
     int numVendas;              // Número atual de vendas
@@ -33,11 +34,12 @@ public:
     void eliminarCliente(int idCliente);
     void alterarNomeCliente(int idCliente, char* novoNome);
     Cliente* buscarClientePorId(int idCliente);
-    void listarClientes() const;
+    void listarClientes();
 
     // Métodos para vendas
     void iniciarVenda(int idCliente);
-    void adicionarItemVenda(char* nomeProduto, int quantidade);
+    void adicionarItemVenda(int idProduto, int quantidade);
+    bool checkoutVenda(); 
     void finalizarVenda(double valorEntregue);
 
     // Métodos para relatórios
@@ -48,3 +50,5 @@ public:
     // Método para inicializar a loja com dados predefinidos
     void inicializarDadosPredefinidos();
 };
+
+
