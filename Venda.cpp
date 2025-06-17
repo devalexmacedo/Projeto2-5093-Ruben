@@ -1,78 +1,79 @@
-// Venda.cpp - Implementação da classe Venda
-#define _CRT_SECURE_NO_WARNINGS
 #include "Venda.h"
-#include <string.h>
-#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <ctime>
-#include <string>
-
-using namespace std;
-
-// String vazia estática para retorno seguro
-static char stringVazia[1] = { '\0' };
+#include <cstdlib>
 
 // Construtor padrão
 Venda::Venda() {
     numeroFatura = 0;
     numeroCliente = 0;
-    numItens = 0;
+    totalSemIVA = 0.0;
+    totalIVA = 0.0;
     totalComIVA = 0.0;
     valorEntregue = 0.0;
     troco = 0.0;
-    data[0] = '\0';
-
-    // Inicializar arrays
-    for (int i = 0; i < 100; i++) {
-        linhas[i] = 0;
-        produtos[i][0] = '\0';
-        quantidades[i] = 0;
-        precosSemIVA[i] = 0.0;
-        ivas[i] = 0.0;
-    }
+    
+    // Obter data e hora atual
+    time_t now = time(0);
+    tm* timeinfo = localtime(&now);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%d/%m/%Y %H:%M", timeinfo);
+    data = buffer;
 }
 
 // Construtor com parâmetros básicos
-Venda::Venda(int numeroFatura, int numeroCliente, char* data) {
+Venda::Venda(int numeroFatura, int numeroCliente) {
     this->numeroFatura = numeroFatura;
     this->numeroCliente = numeroCliente;
-    numItens = 0;
+    totalSemIVA = 0.0;
+    totalIVA = 0.0;
     totalComIVA = 0.0;
     valorEntregue = 0.0;
     troco = 0.0;
-
-    // Copiar data com segurança
-    strcpy(this->data, data);
-
-    // Inicializar arrays
-    for (int i = 0; i < 100; i++) {
-        linhas[i] = 0;
-        produtos[i][0] = '\0';
-        quantidades[i] = 0;
-        precosSemIVA[i] = 0.0;
-        ivas[i] = 0.0;
-    }
+    
+    // Obter data e hora atual
+    time_t now = time(0);
+    tm* timeinfo = localtime(&now);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%d/%m/%Y %H:%M", timeinfo);
+    data = buffer;
 }
 
 // Métodos de acesso (getters)
-int Venda::getNumeroFatura() {
+int Venda::getNumeroFatura() const {
     return numeroFatura;
 }
 
-int Venda::getNumeroCliente() {
+int Venda::getNumeroCliente() const {
     return numeroCliente;
 }
 
-int Venda::getNumItens() {
-    return numItens;
+int Venda::getNumItens() const {
+    return itens.size();
 }
 
-double Venda::getTotalComIVA() {
+float Venda::getTotalSemIVA() const {
+    return totalSemIVA;
+}
+
+float Venda::getTotalIVA() const {
+    return totalIVA;
+}
+
+float Venda::getTotalComIVA() const {
     return totalComIVA;
 }
 
-char* Venda::getData() {
+float Venda::getValorEntregue() const {
+    return valorEntregue;
+}
+
+float Venda::getTroco() const {
+    return troco;
+}
+
+std::string Venda::getData() const {
     return data;
 }
 
@@ -85,162 +86,83 @@ void Venda::setNumeroCliente(int numeroCliente) {
     this->numeroCliente = numeroCliente;
 }
 
-void Venda::setData(char* data) {
-    strcpy(this->data, data);
+void Venda::setData(const std::string& data) {
+    this->data = data;
 }
 
 // Métodos adicionais
-void Venda::adicionarItem(int linha, char* nomeProduto, int quantidade, double precoSemIVA) {
-    if (numItens < 100) {
-        linhas[numItens] = linha;
-
-        // Copiar nome do produto com segurança
-        strcpy(produtos[numItens], nomeProduto);
-
-        quantidades[numItens] = quantidade;
-        precosSemIVA[numItens] = precoSemIVA;
-        ivas[numItens] = precoSemIVA * 0.23; // IVA de 23%
-
-        numItens++;
-        calcularTotal();
-    }
+void Venda::adicionarItem(int idProduto, const std::string& nomeProduto, int quantidade, float precoCusto) {
+    // Calcular preços
+    float precoSemIVA = precoCusto * 1.3; // Preço de venda é custo + 30%
+    float iva = precoSemIVA * 0.23; // IVA de 23%
+    float precoUnitario = precoSemIVA + iva;
+    float total = precoUnitario * quantidade;
+    
+    // Criar item de venda
+    ItemVenda item;
+    item.idProduto = idProduto;
+    item.nomeProduto = nomeProduto;
+    item.quantidade = quantidade;
+    item.precoUnitario = precoUnitario;
+    item.precoSemIVA = precoSemIVA;
+    item.iva = iva;
+    item.total = total;
+    
+    // Adicionar à lista de itens
+    itens.push_back(item);
+    
+    // Recalcular totais
+    calcularTotal();
 }
 
 void Venda::calcularTotal() {
+    totalSemIVA = 0.0;
+    totalIVA = 0.0;
     totalComIVA = 0.0;
-
-    for (int i = 0; i < numItens; i++) {
-        totalComIVA += (precosSemIVA[i] + ivas[i]) * quantidades[i];
+    
+    for (const auto& item : itens) {
+        totalSemIVA += item.precoSemIVA * item.quantidade;
+        totalIVA += item.iva * item.quantidade;
+        totalComIVA += item.total;
     }
 }
 
-void Venda::processarPagamento(double valorEntregue) {
+void Venda::processarPagamento(float valorEntregue) {
     this->valorEntregue = valorEntregue;
     this->troco = valorEntregue - totalComIVA;
 }
 
-// Nova função de checkout
-bool Venda::checkout() {
-    double somaIVA = 0.0;
-    char confirmacao;
-    string input;
-
+void Venda::imprimirTalao() const {
+    // Limpar a tela para garantir fundo branco
     system("cls");
-
-    cout << "=========== Checkout ===========\n";
-    for (int i = 0; i < numItens; ++i) {
-        cout << "Produto: " << produtos[i] << "\n";
-        cout << "Quantidade: " << quantidades[i] << "\n";
-        cout << "Preço Unitário: " << fixed << setprecision(2) << precosSemIVA[i] + ivas[i] << " euros\n";
-        cout << "Preço s/IVA: " << fixed << setprecision(2) << precosSemIVA[i] << " euros\n";
-        cout << "IVA (23%): " << fixed << setprecision(2) << ivas[i] << " euros\n";
-        cout << "---------------------------------\n";
-
-        somaIVA += ivas[i] * quantidades[i];
+    
+    // Imprimir o talão com fundo branco e letra preta
+    std::cout << "======= TALÃO DE COMPRAS =======\n";
+    std::cout << "Fatura N: " << numeroFatura << "\n";
+    std::cout << "Data: " << data << "\n";
+    std::cout << "Cliente N: " << numeroCliente << "\n\n";
+    std::cout << "----- Detalhes dos Produtos -----\n";
+    
+    for (const auto& item : itens) {
+        std::cout << "Produto: " << item.nomeProduto << "\n";
+        std::cout << "Quantidade: " << item.quantidade << "\n";
+        std::cout << "Preço Unitário: " << std::fixed << std::setprecision(2) << item.precoUnitario << " euros\n";
+        std::cout << "Preço s/IVA: " << std::fixed << std::setprecision(2) << item.precoSemIVA << " euros\n";
+        std::cout << "IVA (23%): " << std::fixed << std::setprecision(2) << item.iva << " euros\n";
+        std::cout << "---------------------------------\n";
     }
-
-    cout << "Subtotal s/IVA: " << fixed << setprecision(2) << totalComIVA - somaIVA << " euros\n";
-    cout << "Total IVA: " << fixed << setprecision(2) << somaIVA << " euros\n";
-    cout << "Total c/IVA: " << fixed << setprecision(2) << totalComIVA << " euros\n\n";
-
-    while (true) {
-        do {
-            cout << "Confirmar compra (Y - Sim) ou Desistir da venda (N - Não)? ";
-            getline(cin, input);
-            if (!input.empty()) {
-                confirmacao = input[0];
-            }
-            else {
-                confirmacao = '\0';
-            }
-        } while (confirmacao != 'y' && confirmacao != 'n' && confirmacao != 'Y' && confirmacao != 'N');
-
-        if (confirmacao == 'y' || confirmacao == 'Y') {
-            cout << "Compra confirmada.\n";
-            return true; // Retorna true se a compra for confirmada
-        }
-        else {
-            cout << "Venda cancelada no checkout.\n";
-            return false; // Retorna false se a venda for cancelada
-        }
-    }
-    return false;
+    
+    std::cout << "Subtotal s/IVA: " << std::fixed << std::setprecision(2) << totalSemIVA << " euros\n";
+    std::cout << "Total IVA: " << std::fixed << std::setprecision(2) << totalIVA << " euros\n";
+    std::cout << "Total c/IVA: " << std::fixed << std::setprecision(2) << totalComIVA << " euros\n";
+    std::cout << "Valor Pago: " << std::fixed << std::setprecision(2) << valorEntregue << " euros\n";
+    std::cout << "Troco: " << std::fixed << std::setprecision(2) << troco << " euros\n";
+    std::cout << "=====================================\n";
 }
 
-void Venda::imprimirTalao() {
-    double somaIVA = 0.0;
-    for (int i = 0; i < numItens; i++) {
-        somaIVA += ivas[i] * quantidades[i];
-    }
-
-    time_t t = time(nullptr);
-    tm* dataAtual = localtime(&t);
-
-    system("cls"); // Limpa a tela para o talão branco com letras pretas
-
-    cout << "======= TALÃO DE COMPRAS =======\n";
-    cout << "Fatura N: " << numeroFatura << "\n";
-    cout << "Data: " << put_time(dataAtual, "%d/%m/%Y %H:%M") << "\n";
-    cout << "Cliente N: " << numeroCliente << "\n\n";
-    cout << "----- Detalhes dos Produtos -----\n";
-
-    for (int i = 0; i < numItens; i++) {
-        cout << "Produto: " << produtos[i] << "\n";
-        cout << "Quantidade: " << quantidades[i] << "\n";
-        cout << "Preço Unitário: " << fixed << setprecision(2) << precosSemIVA[i] + ivas[i] << " euros\n";
-        cout << "Preço s/IVA: " << fixed << setprecision(2) << precosSemIVA[i] << " euros\n";
-        cout << "IVA (23%): " << fixed << setprecision(2) << ivas[i] * quantidades[i] << " euros\n";
-        cout << "---------------------------------\n";
-    }
-
-    cout << "Subtotal s/IVA: " << fixed << setprecision(2) << totalComIVA - somaIVA << " euros\n";
-    cout << "Total IVA: " << fixed << setprecision(2) << somaIVA << " euros\n";
-    cout << "Total c/IVA: " << fixed << setprecision(2) << totalComIVA << " euros\n";
-    cout << "Valor Pago: " << fixed << setprecision(2) << valorEntregue << " euros\n";
-    cout << "Troco: " << fixed << setprecision(2) << troco << " euros\n";
-    cout << "=====================================\n";
-}
-
-// Métodos para acesso aos itens
-int Venda::getLinha(int indice) {
-    if (indice >= 0 && indice < numItens) {
-        return linhas[indice];
-    }
-    return -1;
-}
-
-char* Venda::getNomeProduto(int indice) {
-    if (indice >= 0 && indice < numItens) {
-        return produtos[indice];
-    }
-    return stringVazia;
-}
-
-int Venda::getQuantidade(int indice) {
-    if (indice >= 0 && indice < numItens) {
-        return quantidades[indice];
-    }
-    return 0;
-}
-
-double Venda::getPrecoSemIVA(int indice) {
-    if (indice >= 0 && indice < numItens) {
-        return precosSemIVA[indice];
-    }
-    return 0.0;
-}
-
-double Venda::getIVA(int indice) {
-    if (indice >= 0 && indice < numItens) {
-        return ivas[indice];
-    }
-    return 0.0;
-}
-
-double Venda::getValorEntregue() {
-    return valorEntregue;
-}
-
-double Venda::getTroco() {
-    return troco;
+// Método para verificar se a venda foi sorteada como grátis (25% de chance)
+bool Venda::verificarVendaGratis() const {
+    // Gera um número aleatório entre 0 e 3
+    // Se for 0 (25% de chance), a venda é grátis
+    return (rand() % 4) == 0;
 }

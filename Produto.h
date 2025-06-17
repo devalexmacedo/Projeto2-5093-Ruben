@@ -1,38 +1,39 @@
-// Produto.h - Definição da classe Produto
-#pragma once
+#ifndef PRODUTO_H
+#define PRODUTO_H
+
+#include <string>
 
 class Produto {
 private:
-    int id;                 // ID único do produto (gerenciado pela classe Loja)
-    char nome[50];          // Nome do produto
+    int id;                 // ID único do produto (gerenciado automaticamente)
+    std::string nome;       // Nome do produto
     int quantidade;         // Quantidade em estoque
-    double precoCusto;      // Preço de custo
-    double precoVenda;      // Preço de venda (custo + 30%)
+    float precoCusto;       // Preço de custo do produto
 
 public:
     // Construtor padrão
     Produto();
-
-    // Construtor com parâmetros (sem ID, que será gerenciado pela classe Loja)
-    Produto(char* nome, int quantidade, double precoCusto);
-
+    
+    // Construtor com parâmetros (sem ID, que será gerenciado automaticamente)
+    Produto(const std::string& nome, int quantidade, float precoCusto);
+    
     // Métodos de acesso (getters)
-    int getId();
-    char* getNome();
-    int getQuantidade();
-    double getPrecoCusto();
-    double getPrecoVenda();
-
+    int getId() const;
+    std::string getNome() const;
+    int getQuantidade() const;
+    float getPrecoCusto() const;
+    float getPrecoVenda() const;  // Calcula o preço de venda (custo + 30%)
+    
     // Métodos de modificação (setters)
     void setId(int id);  // Usado apenas internamente pela classe Loja
-    void setNome(char* nome);
+    void setNome(const std::string& nome);
     void setQuantidade(int quantidade);
-    void setPrecoCusto(double precoCusto);
-
+    void setPrecoCusto(float precoCusto);
+    
     // Métodos adicionais
-    void calcularPrecoVenda();     // Calcula o preço de venda (custo + 30%)
     void adicionarEstoque(int quantidade);  // Adiciona quantidade ao estoque
     void removerEstoque(int quantidade);    // Remove quantidade do estoque
-    bool temEstoqueSuficiente(int quantidade);  // Verifica se há estoque suficiente
+    bool temEstoqueSuficiente(int quantidade) const;  // Verifica se há estoque suficiente
 };
 
+#endif // PRODUTO_H
