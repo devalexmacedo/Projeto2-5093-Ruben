@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "Produto.h"
 
 // Construtor padrão
@@ -34,8 +35,8 @@ float Produto::getPrecoCusto() const {
 }
 
 float Produto::getPrecoVenda() const {
-    // Preço de venda é o preço de custo + 30%
-    return precoCusto * 1.3;
+    // Preço de venda é o preço de custo + 30% + 23% do IVA em cima do valor final.
+    return (precoCusto * 1.3) * 1.23;
 }
 
 // Métodos de modificação (setters)

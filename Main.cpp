@@ -1,10 +1,76 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <sstream>
 #include <limits>
 #include <cstdlib>
 #include <ctime>
 #include "Loja.h"
+#include <algorithm>
+
+using namespace std;
+
+// Função auxiliar para limpar o buffer de entrada
+void limparBufferEntrada() {
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+// Função para tratar entrada inválida
+void tratarErroEntrada() {
+    std::cout << "Entrada inválida. Por favor, tente novamente.\n";
+    std::cin.clear();
+    limparBufferEntrada();
+}
+
+// Função para obter um int válido do usuário
+int obterInt(const string& prompt) {
+    int n;
+    string entrada;
+
+    while (true) {
+        cout << prompt;
+        getline(cin, entrada);
+        stringstream ss(entrada);
+
+        if (ss >> n && ss.eof()) {  // Sucesso se leu um int e não sobrou mais nada
+            return n;
+        }
+        else {
+            tratarErroEntrada(); // Usa suas funções já existentes
+        }
+    }
+}
+
+// Função para obter um float válido do usuário
+float obterFloat(const std::string& prompt) {
+    string entrada;
+    float valor;
+
+    while (true) {
+        cout << prompt;
+        getline(cin, entrada);
+
+        // Substitui vírgula por ponto
+        std::replace(entrada.begin(), entrada.end(), ',', '.');
+
+        stringstream ss(entrada);
+        if (ss >> valor && ss.eof() && valor > 0) {
+            return valor;
+        }
+        else {
+            tratarErroEntrada();
+        }
+    }
+}
+
+// Função para obter uma string válida do usuário
+std::string obterString(const std::string& prompt) {
+    std::string valor;
+    std::cout << prompt;
+    std::getline(std::cin, valor);
+    return valor;
+}
 
 #ifdef _WIN32
     #include <conio.h>
@@ -26,58 +92,10 @@
     #define GETCH() getch()
 #endif
 
-// Função auxiliar para limpar o buffer de entrada
-void limparBufferEntrada() {
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
-
-// Função para tratar entrada inválida
-void tratarErroEntrada() {
-    std::cout << "Entrada inválida. Por favor, tente novamente.\n";
-    std::cin.clear();
-    limparBufferEntrada();
-}
-
-// Função para obter um int válido do usuário
-int obterInt(const std::string& prompt) {
-    int valor;
-    while (true) {
-        std::cout << prompt;
-        if (std::cin >> valor) {
-            limparBufferEntrada();
-            return valor;
-        } else {
-            tratarErroEntrada();
-        }
-    }
-}
-
-// Função para obter um float válido do usuário
-float obterFloat(const std::string& prompt) {
-    float valor;
-    while (true) {
-        std::cout << prompt;
-        if (std::cin >> valor && valor > 0) {
-            limparBufferEntrada();
-            return valor;
-        } else {
-            tratarErroEntrada();
-        }
-    }
-}
-
-// Função para obter uma string válida do usuário
-std::string obterString(const std::string& prompt) {
-    std::string valor;
-    std::cout << prompt;
-    std::getline(std::cin, valor);
-    return valor;
-}
-
 // Função para pausar e aguardar tecla
 void pausar() {
     std::cout << "\nPressione qualquer tecla para continuar...";
-    GETCH();
+    _getch();
 }
 
 // Função para limpar a tela
@@ -208,14 +226,29 @@ void menuProdutos(Loja& loja) {
             case 4: {
                 limparTela();
                 loja.listarProdutos();
+
                 int id = obterInt("ID do produto: ");
+                Produto* produto = loja.buscarProduto(id);
+
+                if (!produto) {
+                    std::cout << "Produto com ID " << id << " não encontrado!\n";
+                    pausar();
+                    break;
+                }
+
+                std::cout << "Produto atual: " << produto->getNome()
+                    << " | Preço atual: " << std::fixed << std::setprecision(2)
+                    << produto->getPrecoCusto() << " EUR\n";
+
                 float novoPreco = obterFloat("Novo preço de custo: ");
-                
+
                 if (loja.atualizarPrecoProduto(id, novoPreco)) {
                     std::cout << "Preço atualizado com sucesso!\n";
-                } else {
-                    std::cout << "Produto não encontrado ou preço inválido!\n";
                 }
+                else {
+                    std::cout << "Preço inválido!\n";
+                }
+
                 pausar();
                 break;
             }
