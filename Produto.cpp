@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Produto.h"
-
+#include <iostream>
+using namespace std;
 // Construtor padrão
 Produto::Produto() {
     id = 0;
@@ -49,10 +50,19 @@ void Produto::setNome(const std::string& nome) {
 }
 
 void Produto::setQuantidade(int quantidade) {
+    // Verifica se a quantidade é não negativa antes de atribuir
+    if (quantidade >= 0) { // Verifica se a quantidade é não negativa
+       cout << "Quantidade não pode ser negativa. Atribuindo 0." << endl;
+       quantidade = 0;
+    } 
     this->quantidade = quantidade;
 }
 
 void Produto::setPrecoCusto(float precoCusto) {
+    if (precoCusto < 0) { // Verifica se o preço de custo é não negativo
+        cout << "Preço de custo não pode ser negativo. Atribuindo 0." << endl;
+        precoCusto = 0.0;
+    }   
     this->precoCusto = precoCusto;
 }
 
@@ -64,6 +74,11 @@ void Produto::adicionarEstoque(int quantidade) {
 }
 
 void Produto::removerEstoque(int quantidade) {
+    // Verifica se a quantidade é positiva e se há estoque suficiente
+     if (quantidade < 0) { // Verifica se a quantidade não é negativa
+        cout << "Quantidade a remover não pode ser negativa." << endl;
+        return;
+    }
     if (quantidade > 0 && this->quantidade >= quantidade) {
         this->quantidade -= quantidade;
     }
