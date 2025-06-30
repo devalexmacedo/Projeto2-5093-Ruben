@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Cliente.h"
+#include <iostream>
 
 // Construtor padrão
 Cliente::Cliente() {
@@ -40,13 +41,28 @@ void Cliente::setId(int id) {
 }
 
 void Cliente::setNome(const std::string& nome) {
+    if (nome.empty()) { // Verifica se o nome não é vazio
+        std::cout << "Nome não pode ser vazio. Atribuindo 'Cliente Desconhecido'." << std::endl;
+        this->nome = "Cliente Desconhecido";
+        return;
+    }
     this->nome = nome;
 }
 
 void Cliente::setTelefone(const std::string& telefone) {
+    if (telefone.empty()) { // Verifica se o telefone não é vazio
+        std::cout << "Telefone não pode ser vazio. Atribuindo 'Telefone Desconhecido'." << std::endl;
+        this->telefone = "Telefone Desconhecido";
+        return;
+    }
     this->telefone = telefone;
 }
 
 void Cliente::setMorada(const std::string& morada) {
+    if (morada.empty()) { // Verifica se a morada não é vazia
+        std::cout << "Morada não pode ser vazia. Atribuindo 'Morada Desconhecida'." << std::endl;
+        this->morada = "Morada Desconhecida";
+        return;
+    }
     this->morada = morada;
 }
