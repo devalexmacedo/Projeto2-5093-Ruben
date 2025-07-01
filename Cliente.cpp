@@ -1,7 +1,5 @@
 #include "Cliente.h"
 
-using namespace std;
-
 // Construtor padrão
 Cliente::Cliente() : id(0) {}
 
@@ -34,18 +32,15 @@ void Cliente::setId(int newId) {
     id = newId;
 }
 
-// Define o nome do cliente
-void Cliente::setNome(const string& newNome) {
-    nome = newNome;
+void Cliente::setNome(const std::string& nome) {
+    this->nome = nome;
 }
 
-// Define o telefone do cliente
-void Cliente::setTelefone(const string& newTelefone) {
-    telefone = newTelefone;
+void Cliente::setTelefone(const std::string& telefone) {
+    this->telefone = telefone;
 }
 
-// Define a morada do cliente
-void Cliente::setMorada(const string& newMorada) {
-    morada = newMorada;
+void Cliente::setMorada(const std::string& morada) {
+    this->morada = morada;
 }
 

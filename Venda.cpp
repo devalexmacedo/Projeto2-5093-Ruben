@@ -148,6 +148,12 @@ void Venda::calcularTotal() {
 
 // Processa o pagamento e calcula o troco
 void Venda::processarPagamento(float valorEntregue) {
+    if (valorEntregue < totalComIVA) {
+        std::cout << "Valor entregue é menor que o total com IVA. Pagamento não processado." << std::endl;
+        this->valorEntregue = 0.0;
+        this->troco = 0.0;
+        return;
+    }
     this->valorEntregue = valorEntregue;
     this->troco = valorEntregue - totalComIVA;
 }
