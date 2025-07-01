@@ -1,8 +1,8 @@
 #ifndef LOJA_H
 #define LOJA_H
 
-#include <vector>
 #include <string>
+#include <vector>
 #include "Cliente.h"
 #include "Produto.h"
 #include "Venda.h"
@@ -12,50 +12,56 @@ private:
     std::vector<Cliente> clientes;
     std::vector<Produto> produtos;
     std::vector<Venda> vendas;
+
     int proximoIdCliente;
     int proximoIdProduto;
     int proximoNumeroFatura;
+    int indiceVendaAtual;
+
     static const int MAX_VENDAS = 100;
-    int indiceVendaAtual; // Para controlar o índice circular das vendas
 
 public:
-    // Construtor
     Loja();
-    
-    // Métodos para gestão de clientes
+
+    // Versões não-const para modificação
+    Cliente* buscarCliente(int id);
+    Produto* buscarProduto(int id);
+    Venda* buscarVenda(int numeroFatura);
+
+    // Versões const para acesso somente leitura
+    const Cliente* buscarCliente(int id) const;
+    const Produto* buscarProduto(int id) const;
+    const Venda* buscarVenda(int numeroFatura) const;
+
+    void inicializarDadosIniciais();
+
+    // Gestão de Clientes
     int adicionarCliente(const std::string& nome, const std::string& telefone, const std::string& morada);
     bool removerCliente(int id);
     bool alterarNomeCliente(int id, const std::string& novoNome);
-    Cliente* buscarCliente(int id);
     void listarClientes() const;
-    
-    // Métodos para gestão de produtos
+
+    // Gestão de Produtos
     int adicionarProduto(const std::string& nome, int quantidade, float precoCusto);
     bool removerProduto(int id);
     bool adicionarEstoqueProduto(int id, int quantidade);
     bool atualizarPrecoProduto(int id, float novoPrecoCusto);
-    Produto* buscarProduto(int id);
     void listarProdutos() const;
-    
-    // Métodos para gestão de vendas
+
+    // Gestão de Vendas
     int criarVenda(int idCliente);
     bool adicionarItemVenda(int numeroFatura, int idProduto, int quantidade);
     bool finalizarVenda(int numeroFatura, float valorEntregue);
-    Venda* buscarVenda(int numeroFatura);
-    
-    // Métodos para relatórios
+    bool finalizarVendaSilenciosa(int numeroFatura, float valorEntregue); // Para vendas iniciais
+
+    // Relatórios
     void relatorioStock() const;
-    void relatorioVendasPorProduto(const std::string& nomeProduto) const;
+    void relatorioVendasPorProduto(int idProduto) const;
     void relatorioTotalVendas() const;
-    
-    // Métodos auxiliares
-    void inicializarDadosIniciais();
-    void exibirMenu();
-    
-    // Getters
-    int getProximoIdCliente() const { return proximoIdCliente; }
-    int getProximoIdProduto() const { return proximoIdProduto; }
-    int getProximoNumeroFatura() const { return proximoNumeroFatura; }
+
+private:
+    // Função auxiliar para criar vendas iniciais
+    void criarVendasIniciais();
 };
 
 #endif // LOJA_H

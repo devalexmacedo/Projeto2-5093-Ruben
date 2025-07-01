@@ -3,37 +3,43 @@
 
 #include <string>
 
+using namespace std;
+
 class Produto {
 private:
-    int id;                 // ID único do produto (gerenciado automaticamente)
-    std::string nome;       // Nome do produto
-    int quantidade;         // Quantidade em estoque
-    float precoCusto;       // Preço de custo do produto
+    int id;
+    string nome;
+    int quantidade;
+    float precoCusto;
+    float precoVenda;
+
+    // Calcula o preço de venda com base no custo
+    void calcularPrecoVenda();
 
 public:
     // Construtor padrão
     Produto();
-    
-    // Construtor com parâmetros (sem ID, que será gerenciado automaticamente)
-    Produto(const std::string& nome, int quantidade, float precoCusto);
-    
-    // Métodos de acesso (getters)
+
+    // Construtor com parâmetros
+    Produto(const string& nome, int quantidade, float precoCusto);
+
+    // Métodos de acesso
     int getId() const;
-    std::string getNome() const;
+    string getNome() const;
     int getQuantidade() const;
     float getPrecoCusto() const;
-    float getPrecoVenda() const;  // Calcula o preço de venda (custo + 30%)
-    
-    // Métodos de modificação (setters)
-    void setId(int id);  // Usado apenas internamente pela classe Loja
-    void setNome(const std::string& nome);
-    void setQuantidade(int quantidade);
-    void setPrecoCusto(float precoCusto);
-    
-    // Métodos adicionais
-    void adicionarEstoque(int quantidade);  // Adiciona quantidade ao estoque
-    void removerEstoque(int quantidade);    // Remove quantidade do estoque
-    bool temEstoqueSuficiente(int quantidade) const;  // Verifica se há estoque suficiente
+    float getPrecoVenda() const;
+
+    // Métodos de modificação
+    void setId(int newId);
+    void setNome(const string& newNome);
+    void setPrecoCusto(float newPrecoCusto);
+
+    // Métodos de gestão de estoque
+    void adicionarEstoque(int qtd);
+    bool removerEstoque(int qtd);
+    bool temEstoqueSuficiente(int qtd) const;
 };
 
 #endif // PRODUTO_H
+

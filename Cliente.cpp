@@ -1,52 +1,51 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include "Cliente.h"
 
+using namespace std;
+
 // Construtor padrão
-Cliente::Cliente() {
-    id = 0;
-    nome = "";
-    telefone = "";
-    morada = "";
-}
+Cliente::Cliente() : id(0) {}
 
-// Construtor com parâmetros (sem ID, que será gerenciado automaticamente)
-Cliente::Cliente(const std::string& nome, const std::string& telefone, const std::string& morada) {
-    this->id = 0; // ID inicial 0, será definido pela classe Loja
-    this->nome = nome;
-    this->telefone = telefone;
-    this->morada = morada;
-}
+// Construtor com parâmetros
+Cliente::Cliente(const string& nome, const string& telefone, const string& morada)
+    : nome(nome), telefone(telefone), morada(morada), id(0) {}
 
-// Métodos de acesso (getters)
+// Retorna o ID do cliente
 int Cliente::getId() const {
     return id;
 }
 
-std::string Cliente::getNome() const {
+// Retorna o nome do cliente
+string Cliente::getNome() const {
     return nome;
 }
 
-std::string Cliente::getTelefone() const {
+// Retorna o telefone do cliente
+string Cliente::getTelefone() const {
     return telefone;
 }
 
-std::string Cliente::getMorada() const {
+// Retorna a morada do cliente
+string Cliente::getMorada() const {
     return morada;
 }
 
-// Métodos de modificação (setters)
-void Cliente::setId(int id) {
-    this->id = id;
+// Define o ID do cliente
+void Cliente::setId(int newId) {
+    id = newId;
 }
 
-void Cliente::setNome(const std::string& nome) {
-    this->nome = nome;
+// Define o nome do cliente
+void Cliente::setNome(const string& newNome) {
+    nome = newNome;
 }
 
-void Cliente::setTelefone(const std::string& telefone) {
-    this->telefone = telefone;
+// Define o telefone do cliente
+void Cliente::setTelefone(const string& newTelefone) {
+    telefone = newTelefone;
 }
 
-void Cliente::setMorada(const std::string& morada) {
-    this->morada = morada;
+// Define a morada do cliente
+void Cliente::setMorada(const string& newMorada) {
+    morada = newMorada;
 }
+

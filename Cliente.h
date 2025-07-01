@@ -3,31 +3,34 @@
 
 #include <string>
 
+using namespace std;
+
 class Cliente {
 private:
-    int id;                 // ID único do cliente (gerenciado automaticamente)
-    std::string nome;       // Nome do cliente
-    std::string telefone;   // Número de telefone
-    std::string morada;     // Endereço do cliente
+    int id;
+    string nome;
+    string telefone;
+    string morada;
 
 public:
     // Construtor padrão
     Cliente();
-    
-    // Construtor com parâmetros (sem ID, que será gerenciado automaticamente)
-    Cliente(const std::string& nome, const std::string& telefone, const std::string& morada);
-    
-    // Métodos de acesso (getters)
+
+    // Construtor com parâmetros
+    Cliente(const string& nome, const string& telefone, const string& morada);
+
+    // Métodos de acesso
     int getId() const;
-    std::string getNome() const;
-    std::string getTelefone() const;
-    std::string getMorada() const;
-    
-    // Métodos de modificação (setters)
-    void setId(int id);  // Usado apenas internamente pela classe Loja
-    void setNome(const std::string& nome);
-    void setTelefone(const std::string& telefone);
-    void setMorada(const std::string& morada);
+    string getNome() const;
+    string getTelefone() const;
+    string getMorada() const;
+
+    // Métodos de modificação
+    void setId(int newId);
+    void setNome(const string& newNome);
+    void setTelefone(const string& newTelefone);
+    void setMorada(const string& newMorada);
 };
 
 #endif // CLIENTE_H
+

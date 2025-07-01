@@ -1,74 +1,80 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include "Produto.h"
 
+using namespace std;
+
 // Construtor padrão
-Produto::Produto() {
-    id = 0;
-    nome = "";
-    quantidade = 0;
-    precoCusto = 0.0;
+Produto::Produto() : id(0), quantidade(0), precoCusto(0.0f), precoVenda(0.0f) {}
+
+// Construtor com parâmetros
+Produto::Produto(const string& nome, int quantidade, float precoCusto)
+    : nome(nome), quantidade(quantidade), precoCusto(precoCusto), id(0) {
+    calcularPrecoVenda();
 }
 
-// Construtor com parâmetros (sem ID, que será gerenciado automaticamente)
-Produto::Produto(const std::string& nome, int quantidade, float precoCusto) {
-    this->id = 0; // ID inicial 0, será definido pela classe Loja
-    this->nome = nome;
-    this->quantidade = quantidade;
-    this->precoCusto = precoCusto;
+// Calcula o preço de venda com base no custo (margem de 30%)
+void Produto::calcularPrecoVenda() {
+    precoVenda = precoCusto * 1.3f;
 }
 
-// Métodos de acesso (getters)
+// Retorna o ID do produto
 int Produto::getId() const {
     return id;
 }
 
-std::string Produto::getNome() const {
+// Retorna o nome do produto
+string Produto::getNome() const {
     return nome;
 }
 
+// Retorna a quantidade em estoque
 int Produto::getQuantidade() const {
     return quantidade;
 }
 
+// Retorna o preço de custo
 float Produto::getPrecoCusto() const {
     return precoCusto;
 }
 
+// Retorna o preço de venda
 float Produto::getPrecoVenda() const {
-    // Preço de venda é o preço de custo + 30% + 23% do IVA em cima do valor final.
-    return (precoCusto * 1.3) * 1.23;
+    return precoVenda;
 }
 
-// Métodos de modificação (setters)
-void Produto::setId(int id) {
-    this->id = id;
+// Define o ID do produto
+void Produto::setId(int newId) {
+    id = newId;
 }
 
-void Produto::setNome(const std::string& nome) {
-    this->nome = nome;
+// Define o nome do produto
+void Produto::setNome(const string& newNome) {
+    nome = newNome;
 }
 
-void Produto::setQuantidade(int quantidade) {
-    this->quantidade = quantidade;
+// Define o preço de custo e recalcula o preço de venda
+void Produto::setPrecoCusto(float newPrecoCusto) {
+    precoCusto = newPrecoCusto;
+    calcularPrecoVenda();
 }
 
-void Produto::setPrecoCusto(float precoCusto) {
-    this->precoCusto = precoCusto;
-}
-
-// Métodos adicionais
-void Produto::adicionarEstoque(int quantidade) {
-    if (quantidade > 0) {
-        this->quantidade += quantidade;
+// Adiciona quantidade ao estoque
+void Produto::adicionarEstoque(int qtd) {
+    if (qtd > 0) {
+        quantidade += qtd;
     }
 }
 
-void Produto::removerEstoque(int quantidade) {
-    if (quantidade > 0 && this->quantidade >= quantidade) {
-        this->quantidade -= quantidade;
+// Remove quantidade do estoque
+bool Produto::removerEstoque(int qtd) {
+    if (qtd > 0 && quantidade >= qtd) {
+        quantidade -= qtd;
+        return true;
     }
+    return false;
 }
 
-bool Produto::temEstoqueSuficiente(int quantidade) const {
-    return this->quantidade >= quantidade;
+// Verifica se há estoque suficiente
+bool Produto::temEstoqueSuficiente(int qtd) const {
+    return quantidade >= qtd;
 }
+

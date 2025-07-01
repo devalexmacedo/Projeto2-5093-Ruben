@@ -3,62 +3,68 @@
 
 #include <string>
 #include <vector>
-#include "Produto.h"
 
-// Estrutura para armazenar os itens da venda
+using namespace std;
+
+// Estrutura para armazenar os detalhes de cada item vendido
 struct ItemVenda {
     int idProduto;
-    std::string nomeProduto;
+    string nomeProduto;
     int quantidade;
     float precoUnitario;
     float precoSemIVA;
     float iva;
     float total;
+    
+    // Construtor padrão para inicializar todas as variáveis
+    ItemVenda() : idProduto(0), quantidade(0), precoUnitario(0.0f), 
+                  precoSemIVA(0.0f), iva(0.0f), total(0.0f) {}
 };
 
 class Venda {
 private:
-    int numeroFatura;           // Número único da fatura
-    int numeroCliente;          // ID do cliente que realizou a compra
-    std::vector<ItemVenda> itens; // Itens da venda
-    float totalSemIVA;          // Total sem IVA
-    float totalIVA;             // Total de IVA
-    float totalComIVA;          // Total com IVA
-    float valorEntregue;        // Valor pago pelo cliente
-    float troco;                // Troco a devolver
-    std::string data;           // Data da venda
+    int numeroFatura;
+    int numeroCliente;
+    vector<ItemVenda> itens;
+    float totalSemIVA;
+    float totalIVA;
+    float totalComIVA;
+    float valorEntregue;
+    float troco;
+    string data;
 
 public:
-    // Construtor padrão
     Venda();
-    
-    // Construtor com parâmetros básicos
     Venda(int numeroFatura, int numeroCliente);
-    
-    // Métodos de acesso (getters)
+
+    // Métodos de acesso
     int getNumeroFatura() const;
     int getNumeroCliente() const;
     int getNumItens() const;
+    size_t getNumItens_sizet() const; // Versão alternativa para compatibilidade
     float getTotalSemIVA() const;
     float getTotalIVA() const;
     float getTotalComIVA() const;
     float getValorEntregue() const;
     float getTroco() const;
-    std::string getData() const;
-    
-    // Métodos de modificação (setters)
+    string getData() const;
+
+    // Métodos de modificação
     void setNumeroFatura(int numeroFatura);
     void setNumeroCliente(int numeroCliente);
-    void setData(const std::string& data);
-    
-    // Métodos adicionais
-    void adicionarItem(int idProduto, const std::string& nomeProduto, int quantidade, float precoCusto);
+    void setData(const string& data);
+
+    // Métodos de operação
+    void adicionarItem(int idProduto, const string& nomeProduto, int quantidade, float precoCusto);
     void calcularTotal();
     void processarPagamento(float valorEntregue);
-    void imprimirTalao() const; // Método para imprimir o talão com fundo branco e letra preta
-    
-    // Método para verificar se a venda foi sorteada como grátis (25% de chance)
+    void imprimirTalao() const;
+    bool exibirCheckout() const;
     bool verificarVendaGratis() const;
+
+    const ItemVenda* getItem(int index) const;
+    const ItemVenda* getItem(size_t index) const; // Sobrecarga para compatibilidade
 };
 
 #endif // VENDA_H
+
