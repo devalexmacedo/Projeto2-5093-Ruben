@@ -44,7 +44,7 @@ public:
     // Gestão de Produtos
     int adicionarProduto(const std::string& nome, int quantidade, float precoCusto);
     bool removerProduto(int id);
-    bool adicionarEstoqueProduto(int id, int quantidade);
+    bool adicionarEstoque(int id, int quantidade);
     bool atualizarPrecoProduto(int id, float novoPrecoCusto);
     void listarProdutos() const;
 
@@ -58,6 +58,7 @@ public:
     void relatorioStock() const;
     void relatorioVendasPorProduto(int idProduto) const;
     void relatorioTotalVendas() const;
+    void relatorioEstatisticasVendas() const; // Novo: produto mais/menos vendido, lucros, melhor cliente
 
 private:
     // Função auxiliar para criar vendas iniciais

@@ -254,7 +254,7 @@ void menuProdutos(Loja& loja) {
                 int id = obterIntPositivo("ID do produto: ");
                 int quantidade = obterIntPositivo("Quantidade a adicionar: ");
 
-                if (loja.adicionarEstoqueProduto(id, quantidade)) {
+                if (loja.adicionarEstoque(id, quantidade)) {
                     cout << "Stock adicionado com sucesso!\n";
                 } else {
                     cout << "Produto não encontrado ou quantidade inválida!\n";
@@ -407,6 +407,7 @@ void menuRelatorios(Loja& loja) {
         cout << "1. Relatório de Stock\n";
         cout << "2. Relatório de Vendas por Produto\n";
         cout << "3. Relatório Total de Vendas\n";
+        cout << "4. Estatísticas de Vendas\n";
         cout << "0. Voltar ao Menu Principal\n";
         cout << "==========================================\n";
 
@@ -432,6 +433,12 @@ void menuRelatorios(Loja& loja) {
             case 3: {
                 limparTela();
                 loja.relatorioTotalVendas();
+                pausar();
+                break;
+            }
+            case 4: {
+                limparTela();
+                loja.relatorioEstatisticasVendas();
                 pausar();
                 break;
             }

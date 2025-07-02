@@ -148,12 +148,6 @@ void Venda::calcularTotal() {
 
 // Processa o pagamento e calcula o troco
 void Venda::processarPagamento(float valorEntregue) {
-    if (valorEntregue < totalComIVA) {
-        std::cout << "Valor entregue é menor que o total com IVA. Pagamento não processado." << std::endl;
-        this->valorEntregue = 0.0;
-        this->troco = 0.0;
-        return;
-    }
     this->valorEntregue = valorEntregue;
     this->troco = valorEntregue - totalComIVA;
 }
@@ -201,118 +195,80 @@ bool Venda::exibirCheckout() const {
     return (confirmacao == 's' || confirmacao == 'S');
 }
 
-// Função auxiliar para centralizar texto dentro de uma largura específica
-void printCentered(const std::string& text, int width) {
-    if (width <= text.length()) {
-        cout << text << "\n";
-        return;
-    }
-    int padding = width - text.length();
-    int padLeft = padding / 2;
-    int padRight = padding - padLeft;
-    cout << string(padLeft, ' ') << text << string(padRight, ' ') << "\n";
-}
-
-
 // Imprime o talão da venda com aparência de talão de mercado
 void Venda::imprimirTalao() const {
-    system("cls"); // Limpa a tela
-
+    // Limpa a tela
+    system("cls");
+    
+    // Obtém o handle da console de saída padrão
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    
     // Define a cor do texto para preto (0) e o fundo para branco (15)
     SetConsoleTextAttribute(hConsole, 0 | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
-
-    // Definir uma largura consistente para o talão (50 caracteres), com base nas suas imagens
-    const int talaoWidth = 50;
-    string emptyWhiteLine = string(talaoWidth, ' '); // Linha de espaços com fundo branco
-    string separatorLine = string(talaoWidth, '-'); // Linha de traços
-    string starSeparatorLine = string(talaoWidth, '*'); // Linha de asteriscos
-
-    // Cabeçalho da loja
-    cout << starSeparatorLine << "\n"; // Linha de asteriscos
-    printCentered("LOJA DE INFORMÁTICA", talaoWidth);
-    printCentered("Rua da Tecnologia, 123", talaoWidth);
-    printCentered("Tel: 123-456-789", talaoWidth);
-    printCentered("NIF: 123456789", talaoWidth);
-    cout << starSeparatorLine << "\n"; // Linha de asteriscos
-
-    // Título do Talão
-    cout << emptyWhiteLine << "\n"; // Linha vazia com fundo branco
-    printCentered("TALÃO DE COMPRA", talaoWidth);
-    cout << emptyWhiteLine << "\n"; // Linha vazia com fundo branco
-    cout << separatorLine << "\n"; // Linha de traços
-
-    // Informações da fatura
-    // Garante que o texto + valor preencham a largura total
-    // Ex: "Fatura Nº: " (11 caracteres)
-    cout << left << " Fatura Nº: " << setw(talaoWidth - string(" Fatura Nº: ").length()) << numeroFatura << "\n";
-    cout << left << " Data: " << setw(talaoWidth - string(" Data: ").length()) << data << "\n";
-    cout << left << " Cliente Nº: " << setw(talaoWidth - string(" Cliente Nº: ").length()) << numeroCliente << "\n";
-    cout << separatorLine << "\n";
-
-    // Cabeçalho da tabela de itens
-    // As larguras somam 66: DESCRIÇÃO (40) + QTD (5) + PREÇO (9) + TOTAL (12) = 66
-    const int descColWidth = 30;
-    const int qtdColWidth = 5;
-    const int precoColWidth = 9; // Ajustado para 9 para "XXX.YY€"
-    const int totalColWidth = 12; // Ajustado para 12 para "XXXX.YY€"
-
-    cout << left << setw(descColWidth) << " PRODUTO" // Use " PRODUTO" para combinar com suas imagens recentes
-        << right << setw(qtdColWidth) << "QTD"
-        << setw(precoColWidth) << "PREÇO"
-        << setw(totalColWidth) << "TOTAL" << "\n";
-    cout << separatorLine << "\n";
-
-    // Lista os produtos de forma organizada
-    for (const auto& item : itens) {
-        string nomeTruncado = item.nomeProduto;
-        // Trunca o nome do produto se for muito longo para caber na coluna, adicionando "..."
-        if (nomeTruncado.length() > descColWidth - 3) {
-            nomeTruncado = nomeTruncado.substr(0, descColWidth - 3) + "...";
+    
+    // Cria o talão com fundo branco completo (50 caracteres de largura)
+    string linha(50, ' ');
+    string separador(50, '-');
+    
+    cout << linha << "\n";
+    cout << "                LOJA DE INFORMÁTICA               " << "\n";
+    cout << "             Rua da Tecnologia, 123              " << "\n";
+    cout << "              Tel: 123-456-789                   " << "\n";
+    cout << "                NIF: 123456789                   " << "\n";
+    cout << linha << "\n";
+    cout << separador << "\n";
+    cout << "              TALÃO DE COMPRA                    " << "\n";
+    cout << separador << "\n";
+    cout << " Fatura Nº: " << left << setw(32) << numeroFatura << " " << "\n";
+    cout << " Data: " << left << setw(37) << data << " " << "\n";
+    cout << " Cliente Nº: " << left << setw(30) << numeroCliente << " " << "\n";
+    cout << separador << "\n";
+    cout << " PRODUTO                   QTD   PREÇO    TOTAL  " << "\n";
+    cout << separador << "\n";
+    
+    // Lista os produtos de forma organizada com separadores
+    for (size_t i = 0; i < itens.size(); i++) {
+        const auto& item = itens[i];
+        string nomeTruncado = item.nomeProduto.substr(0, 20);
+        cout << " " << left << setw(20) << nomeTruncado
+             << right << setw(6) << item.quantidade
+             << right << setw(8) << fixed << setprecision(2) << item.precoUnitario << "€"
+             << right << setw(8) << fixed << setprecision(2) << item.total << "€"
+             << "      " << "\n";
+        
+        // Adiciona separador entre itens (exceto no último)
+        if (i < itens.size() - 1) {
+            string separadorItem(50, '*');
+            cout << separadorItem << "\n";
         }
-
-        cout << left << " " << setw(descColWidth - 1) << nomeTruncado // -1 para o espaço inicial
-            << right << setw(qtdColWidth) << item.quantidade
-            << setw(precoColWidth - 1) << fixed << setprecision(2) << item.precoUnitario << "€" // -1 para o '€'
-            << setw(totalColWidth - 1) << fixed << setprecision(2) << item.total << "€" << "\n"; // -1 para o '€'
     }
-
-    cout << separatorLine << "\n";
-
-    // Totais (Subtotal, IVA, TOTAL, Valor Entregue, Troco)
-    // Largura para a etiqueta dos totais (ex: "Subtotal s/IVA: ")
-    // Largura para o valor e o símbolo "€" (ex: "1234.56€")
-    const int labelColTotalWidth = 35;
-    const int valueColTotalWidth = talaoWidth - labelColTotalWidth; // 50 - 35 = 15
-
-    cout << left << setw(labelColTotalWidth) << " Subtotal s/IVA: " // Adicionado espaço inicial para alinhamento
-        << right << setw(valueColTotalWidth - 1) << fixed << setprecision(2) << totalSemIVA << "€" << "\n";
-    cout << left << setw(labelColTotalWidth) << " IVA (23%): " // Adicionado espaço inicial para alinhamento
-        << right << setw(valueColTotalWidth - 1) << fixed << setprecision(2) << totalIVA << "€" << "\n";
-    cout << starSeparatorLine << "\n"; // Usar separador de asteriscos para o total, como na imagem
-    cout << left << setw(labelColTotalWidth) << " TOTAL: " // Adicionado espaço inicial para alinhamento
-        << right << setw(valueColTotalWidth - 1) << fixed << setprecision(2) << totalComIVA << "€" << "\n";
-    cout << starSeparatorLine << "\n"; // Usar separador de asteriscos
-
-    // Valor Pago e Troco
-    cout << left << setw(labelColTotalWidth) << " Valor Pago: " // Adicionado espaço inicial para alinhamento
-        << right << setw(valueColTotalWidth - 1) << fixed << setprecision(2) << valorEntregue << "€" << "\n";
-    cout << left << setw(labelColTotalWidth) << " Troco: " // Adicionado espaço inicial para alinhamento
-        << right << setw(valueColTotalWidth - 1) << fixed << setprecision(2) << troco << "€" << "\n";
-    cout << starSeparatorLine << "\n"; // Usar separador de asteriscos
-
-    // Mensagens Finais
-    cout << emptyWhiteLine << "\n"; // Linha vazia com fundo branco
-    printCentered("OBRIGADO PELA SUA COMPRA!", talaoWidth);
-    printCentered("VOLTE SEMPRE!", talaoWidth);
-    cout << emptyWhiteLine << "\n"; // Uma linha vazia final para espaçamento controlado
-    cout << starSeparatorLine; // Final com asteriscos
-
+    
+    cout << separador << "\n";
+    cout << " Subtotal s/IVA: " << right << setw(25) << fixed << setprecision(2) << totalSemIVA << "€ " << "\n";
+    cout << " IVA (23%): " << right << setw(30) << fixed << setprecision(2) << totalIVA << "€ " << "\n";
+    cout << separador << "\n";
+    cout << " TOTAL: " << right << setw(34) << fixed << setprecision(2) << totalComIVA << "€ " << "\n";
+    cout << separador << "\n";
+    cout << "                                                  " << "\n";
+    cout << " Valor Pago: " << right << setw(29) << fixed << setprecision(2) << valorEntregue << "€ " << "\n";
+    cout << " Troco: " << right << setw(34) << fixed << setprecision(2) << troco << "€ " << "\n";
+    cout << separador << "\n";
+    cout << "                                                  " << "\n";
+    cout << "            OBRIGADO PELA SUA COMPRA!            " << "\n";
+    cout << "               VOLTE SEMPRE!                     " << "\n";
+    cout << "                                                  " << "\n";
+    cout << linha << "\n";
+    
+    // Preenche o resto da tela com fundo branco (aproximadamente 15 linhas extras)
+    for (int i = 0; i < 15; i++) {
+        cout << linha << "\n";
+    }
+    
     // Restaura as cores padrão do console
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-
+    
+    cout << "\n";
 }
-
 
 // Verifica se a venda foi sorteada como grátis (25% de chance)
 bool Venda::verificarVendaGratis() const {

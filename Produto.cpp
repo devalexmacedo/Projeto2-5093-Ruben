@@ -1,7 +1,7 @@
 #include "Produto.h"
-#include <iostream>
 
 using namespace std;
+
 // Construtor padrão
 Produto::Produto() : id(0), quantidade(0), precoCusto(0.0f), precoVenda(0.0f) {}
 
@@ -62,7 +62,6 @@ void Produto::adicionarEstoque(int qtd) {
     if (qtd > 0) {
         quantidade += qtd;
     }
-    this->quantidade += quantidade;
 }
 
 // Remove quantidade do estoque
