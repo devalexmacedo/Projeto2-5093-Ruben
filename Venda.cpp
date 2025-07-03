@@ -7,8 +7,62 @@
 #include <string>
 #include <algorithm>
 #include <windows.h>
+#include <sstream>
+#include <locale>
+#include <codecvt>
+#include <cwchar>
 
 using namespace std;
+
+// Função para calcular o comprimento visível de uma string, considerando caracteres multibyte (UTF-8)
+// Esta versão tenta ser mais pragmática para caracteres comuns que causam problemas de alinhamento.
+int getVisibleLength(const string& str) {
+    int length = 0;
+    for (char c : str) {
+        // Caracteres ASCII ocupam 1 unidade de largura
+        if ((c & 0x80) == 0) {
+            length++;
+        }
+        else if ((c & 0xE0) == 0xC0) { // 2-byte UTF-8 character
+            // Para caracteres como 'º' e '€', que são 2 ou 3 bytes em UTF-8 mas 1 caractere visual
+            // Esta é uma simplificação. Em um ambiente de console Windows, eles geralmente ocupam 1 célula.
+            // Se for um caractere de início de sequência multibyte, incrementa o comprimento.
+            // Assumimos que a maioria dos caracteres multibyte comuns ocupam 1 célula visual.
+            length++;
+        }
+        else if ((c & 0xF0) == 0xE0) { // 3-byte UTF-8 character
+            length++;
+        }
+        else if ((c & 0xF8) == 0xF0) { // 4-byte UTF-8 character
+            length++;
+        }
+    }
+    return length;
+}
+
+// Função auxiliar genérica para formatar strings com largura fixa, alinhamento e caractere de preenchimento
+string formatarLinha(const string& conteudo, int largura, ios_base::fmtflags alinhamento, char preenchimento = ' ') {
+    stringstream ss;
+    ss << setfill(preenchimento);
+
+    int conteudo_len = getVisibleLength(conteudo);
+
+    // Calcula os espaços a preencher com base no comprimento visível
+    int espacos_a_preencher = largura - conteudo_len;
+
+    if (alinhamento == ios::left) {
+        ss << left << setw(largura) << conteudo;
+    }
+    else if (alinhamento == ios::right) {
+        ss << right << setw(largura) << conteudo;
+    }
+    else { // ios::internal para centralizar
+        int espacos_antes = espacos_a_preencher / 2;
+        int espacos_depois = espacos_a_preencher - espacos_antes;
+        ss << string(max(0, espacos_antes), preenchimento) << conteudo << string(max(0, espacos_depois), preenchimento);
+    }
+    return ss.str();
+}
 
 // Construtor padrão da classe Venda
 Venda::Venda() {
@@ -155,7 +209,7 @@ void Venda::processarPagamento(float valorEntregue) {
 // Exibe o checkout e pede confirmação do cliente
 bool Venda::exibirCheckout() const {
     if (itens.empty()) {
-        cout << "Não há itens na venda para checkout.\n";
+        cout << "Nao ha itens na venda para checkout.\n";
         return false;
     }
 
@@ -166,8 +220,8 @@ bool Venda::exibirCheckout() const {
     for (const auto& item : itens) {
         cout << "Produto: " << item.nomeProduto << "\n";
         cout << "Quantidade: " << item.quantidade << "\n";
-        cout << "Preço Unitário: " << fixed << setprecision(2) << item.precoUnitario << " euros\n";
-        cout << "Preço s/IVA: " << fixed << setprecision(2) << item.precoSemIVA << " euros\n";
+        cout << "Preco Unitario: " << fixed << setprecision(2) << item.precoUnitario << " euros\n";
+        cout << "Preco s/IVA: " << fixed << setprecision(2) << item.precoSemIVA << " euros\n";
         cout << "IVA (23%): " << fixed << setprecision(2) << item.iva << " euros\n";
         cout << "---------------------------------\n";
     }
@@ -180,102 +234,143 @@ bool Venda::exibirCheckout() const {
     char confirmacao;
 
     do {
-        cout << "Confirmar compra (s - Sim) ou Desistir da venda (n - Não)? ";
+        cout << "Confirmar compra (s - Sim) ou Desistir da venda (n - Nao)? ";
         getline(cin, input);
         if (!input.empty()) {
             confirmacao = input[0];
-        } else {
+        }
+        else {
             confirmacao = '\0';
         }
         if (confirmacao != 's' && confirmacao != 'n' && confirmacao != 'S' && confirmacao != 'N') {
-            cout << "Opção inválida! Digite apenas s (Sim) ou n (Não).\n";
+            cout << "Opcao invalida! Digite apenas s (Sim) ou n (Nao).\n";
         }
     } while (confirmacao != 's' && confirmacao != 'n' && confirmacao != 'S' && confirmacao != 'N');
 
     return (confirmacao == 's' || confirmacao == 'S');
 }
 
-// Imprime o talão da venda com aparência de talão de mercado
+// Imprime o talao da venda com aparencia de talao de mercado
 void Venda::imprimirTalao() const {
     // Limpa a tela
     system("cls");
-    
+
+    // Define a codificação de saída do console para UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
     // Obtém o handle da console de saída padrão
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    
+
     // Define a cor do texto para preto (0) e o fundo para branco (15)
     SetConsoleTextAttribute(hConsole, 0 | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
-    
-    // Cria o talão com fundo branco completo (50 caracteres de largura)
-    string linha(50, ' ');
-    string separador(50, '-');
-    
-    cout << linha << "\n";
-    cout << "                LOJA DE INFORMÁTICA               " << "\n";
-    cout << "             Rua da Tecnologia, 123              " << "\n";
-    cout << "              Tel: 123-456-789                   " << "\n";
-    cout << "                NIF: 123456789                   " << "\n";
-    cout << linha << "\n";
-    cout << separador << "\n";
-    cout << "              TALÃO DE COMPRA                    " << "\n";
-    cout << separador << "\n";
-    cout << " Fatura Nº: " << left << setw(32) << numeroFatura << " " << "\n";
-    cout << " Data: " << left << setw(37) << data << " " << "\n";
-    cout << " Cliente Nº: " << left << setw(30) << numeroCliente << " " << "\n";
-    cout << separador << "\n";
-    cout << " PRODUTO                   QTD   PREÇO    TOTAL  " << "\n";
-    cout << separador << "\n";
-    
-    // Lista os produtos de forma organizada com separadores
+
+    const int largura = 70; // Largura fixa do talao
+
+    // Bordas superior e inferior
+    string linhaTopo = "+" + string(largura - 2, '-') + "+";
+    string linhaFundo = "+" + string(largura - 2, '=') + "+";
+
+    // Cabecalho
+    cout << linhaTopo << "\n";
+    cout << "|" << formatarLinha("LOJA DE INFORMATICA", largura - 2, ios::internal) << "|\n";
+    cout << "|" << formatarLinha("Rua da Tecnologia, 123", largura - 2, ios::internal) << "|\n";
+    cout << "|" << formatarLinha("Tel: 123-456-789", largura - 2, ios::internal) << "|\n";
+    cout << "|" << formatarLinha("NIF: 123456789", largura - 2, ios::internal) << "|\n";
+    cout << "|" << formatarLinha("", largura - 2, ios::left) << "|\n";
+    cout << linhaFundo << "\n";
+    cout << "|" << formatarLinha("TALAO DE COMPRA", largura - 2, ios::internal) << "|\n";
+    cout << linhaFundo << "\n";
+
+    // Informacoes da fatura
+    stringstream ss_fatura;
+    ss_fatura << "Fatura No: " << numeroFatura;
+    cout << "|" << formatarLinha(ss_fatura.str(), largura - 2, ios::left) << "|\n";
+
+    stringstream ss_data;
+    ss_data << "Data: " << data;
+    cout << "|" << formatarLinha(ss_data.str(), largura - 2, ios::left) << "|\n";
+
+    stringstream ss_cliente;
+    ss_cliente << "Cliente No: " << numeroCliente;
+    cout << "|" << formatarLinha(ss_cliente.str(), largura - 2, ios::left) << "|\n";
+
+    cout << linhaFundo << "\n";
+    cout << "|" << formatarLinha("No  PRODUTO                          QTD   PRECO    TOTAL", largura - 2, ios::left) << "|\n";
+    cout << linhaFundo << "\n";
+
+    // Lista os produtos
     for (size_t i = 0; i < itens.size(); i++) {
         const auto& item = itens[i];
-        string nomeTruncado = item.nomeProduto.substr(0, 20);
-        cout << " " << left << setw(20) << nomeTruncado
-             << right << setw(6) << item.quantidade
-             << right << setw(8) << fixed << setprecision(2) << item.precoUnitario << "€"
-             << right << setw(8) << fixed << setprecision(2) << item.total << "€"
-             << "      " << "\n";
-        
-        // Adiciona separador entre itens (exceto no último)
+        stringstream ss_item;
+        string nomeTruncado = item.nomeProduto;
+        // Ajusta o truncamento para considerar o comprimento visível
+        if (getVisibleLength(nomeTruncado) > 27) {
+            nomeTruncado = nomeTruncado.substr(0, 27) + "...";
+        }
+        ss_item << setw(2) << (i + 1) << ". "
+            << left << setw(30) << nomeTruncado
+            << right << setw(6) << item.quantidade
+            << right << setw(8) << fixed << setprecision(2) << item.precoUnitario << "EUR"
+            << right << setw(8) << fixed << setprecision(2) << item.total << "EUR";
+
+        cout << "|" << formatarLinha(ss_item.str(), largura - 2, ios::left) << "|\n";
+
+        // Separador entre itens
         if (i < itens.size() - 1) {
-            string separadorItem(50, '*');
-            cout << separadorItem << "\n";
+            cout << "|" << string(largura - 2, '*') << "|\n";
         }
     }
-    
-    cout << separador << "\n";
-    cout << " Subtotal s/IVA: " << right << setw(25) << fixed << setprecision(2) << totalSemIVA << "€ " << "\n";
-    cout << " IVA (23%): " << right << setw(30) << fixed << setprecision(2) << totalIVA << "€ " << "\n";
-    cout << separador << "\n";
-    cout << " TOTAL: " << right << setw(34) << fixed << setprecision(2) << totalComIVA << "€ " << "\n";
-    cout << separador << "\n";
-    cout << "                                                  " << "\n";
-    cout << " Valor Pago: " << right << setw(29) << fixed << setprecision(2) << valorEntregue << "€ " << "\n";
-    cout << " Troco: " << right << setw(34) << fixed << setprecision(2) << troco << "€ " << "\n";
-    cout << separador << "\n";
-    cout << "                                                  " << "\n";
-    cout << "            OBRIGADO PELA SUA COMPRA!            " << "\n";
-    cout << "               VOLTE SEMPRE!                     " << "\n";
-    cout << "                                                  " << "\n";
-    cout << linha << "\n";
-    
-    // Preenche o resto da tela com fundo branco (aproximadamente 15 linhas extras)
-    for (int i = 0; i < 15; i++) {
-        cout << linha << "\n";
-    }
-    
+
+    cout << linhaFundo << "\n";
+
+    // Linhas de totais e pagamento
+    stringstream ss_subtotal;
+    ss_subtotal << "Subtotal s/IVA: " << fixed << setprecision(2) << totalSemIVA << "EUR";
+    cout << "|" << formatarLinha(ss_subtotal.str(), largura - 2, ios::right) << "|\n";
+
+    stringstream ss_iva;
+    ss_iva << "IVA (23%): " << fixed << setprecision(2) << totalIVA << "EUR";
+    cout << "|" << formatarLinha(ss_iva.str(), largura - 2, ios::right) << "|\n";
+
+    cout << linhaFundo << "\n";
+
+    stringstream ss_total;
+    ss_total << "TOTAL: " << fixed << setprecision(2) << totalComIVA << "EUR";
+    cout << "|" << formatarLinha(ss_total.str(), largura - 2, ios::right) << "|\n";
+
+    cout << linhaFundo << "\n";
+    cout << "|" << formatarLinha("", largura - 2, ios::left) << "|\n";
+
+    stringstream ss_valor_pago;
+    ss_valor_pago << "Valor Pago: " << fixed << setprecision(2) << valorEntregue << "EUR";
+    cout << "|" << formatarLinha(ss_valor_pago.str(), largura - 2, ios::right) << "|\n";
+
+    stringstream ss_troco;
+    ss_troco << "Troco: " << fixed << setprecision(2) << troco << "EUR";
+    cout << "|" << formatarLinha(ss_troco.str(), largura - 2, ios::right) << "|\n";
+
+    cout << linhaFundo << "\n";
+    cout << "|" << formatarLinha("", largura - 2, ios::left) << "|\n";
+    cout << "|" << formatarLinha("OBRIGADO PELA SUA COMPRA!", largura - 2, ios::internal) << "|\n";
+    cout << "|" << formatarLinha("VOLTE SEMPRE!", largura - 2, ios::internal) << "|\n";
+    cout << "|" << formatarLinha("", largura - 2, ios::left) << "|\n";
+    cout << linhaTopo << "\n";
+
     // Restaura as cores padrão do console
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-    
-    cout << "\n";
+
+    // Adiciona a pausa para o usuário pressionar uma tecla, sem linhas extras
+    cout << "\n"; // Adiciona uma quebra de linha para separar o talao da mensagem
+    system("pause"); // Equivalente a "Pressione qualquer tecla para continuar..."
 }
 
-// Verifica se a venda foi sorteada como grátis (25% de chance)
+// Verifica se a venda foi sorteada como gratis (25% de chance)
 bool Venda::verificarVendaGratis() const {
     return (rand() % 4) == 0;
 }
 
-// Retorna um ponteiro para um item específico da venda
+// Retorna um ponteiro para um item especifico da venda
 const ItemVenda* Venda::getItem(int index) const {
     if (index >= 0 && index < static_cast<int>(itens.size())) {
         return &itens[index];
@@ -290,4 +385,3 @@ const ItemVenda* Venda::getItem(size_t index) const {
     }
     return nullptr;
 }
-

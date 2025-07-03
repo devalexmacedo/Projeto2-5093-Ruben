@@ -6,8 +6,8 @@ using namespace std;
 Cliente::Cliente() : id(0) {}
 
 // Construtor com parâmetros
-Cliente::Cliente(const string& nome, const string& telefone, const string& morada)
-    : nome(nome), telefone(telefone), morada(morada), id(0) {}
+Cliente::Cliente(const string& nome, const string& telefone, const string& morada, const string& cidade)
+    : nome(nome), telefone(telefone), morada(morada), cidade(cidade), id(0) {}
 
 // Retorna o ID do cliente
 int Cliente::getId() const {
@@ -29,6 +29,11 @@ string Cliente::getMorada() const {
     return morada;
 }
 
+// Retorna a cidade do cliente
+string Cliente::getCidade() const {
+    return cidade;
+}
+
 // Define o ID do cliente
 void Cliente::setId(int newId) {
     id = newId;
@@ -48,4 +53,11 @@ void Cliente::setTelefone(const string& newTelefone) {
 void Cliente::setMorada(const string& newMorada) {
     morada = newMorada;
 }
+
+// Define a cidade do cliente
+void Cliente::setCidade(const string& newCidade) {
+    cidade = newCidade;
+}
+
+
 

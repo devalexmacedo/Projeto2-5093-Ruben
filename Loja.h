@@ -36,7 +36,7 @@ public:
     void inicializarDadosIniciais();
 
     // Gestão de Clientes
-    int adicionarCliente(const std::string& nome, const std::string& telefone, const std::string& morada);
+    int adicionarCliente(const std::string& nome, const std::string& telefone, const std::string& morada, const std::string& cidade);
     bool removerCliente(int id);
     bool alterarNomeCliente(int id, const std::string& novoNome);
     void listarClientes() const;
@@ -66,4 +66,6 @@ private:
 };
 
 #endif // LOJA_H
+
+
 

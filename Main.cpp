@@ -10,24 +10,24 @@
 #include <algorithm>
 
 #ifdef _WIN32
-    #include <conio.h>
-    #define GETCH() _getch()
+#include <conio.h>
+#define GETCH() _getch()
 #else
-    #include <termios.h>
-    #include <unistd.h>
-    // Implementação de getch para sistemas Unix-like
-    int getch() {
-        struct termios oldt, newt;
-        int ch;
-        tcgetattr(STDIN_FILENO, &oldt);
-        newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-        ch = getchar();
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-        return ch;
-    }
-    #define GETCH() getch()
+#include <termios.h>
+#include <unistd.h>
+// Implementação de getch para sistemas Unix-like
+int getch() {
+    struct termios oldt, newt;
+    int ch;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return ch;
+}
+#define GETCH() getch()
 #endif
 
 using namespace std;
@@ -138,11 +138,11 @@ void pausar() {
 
 // Limpa a tela do console
 void limparTela() {
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
 
 // Menu de gestão de clientes
@@ -161,55 +161,58 @@ void menuClientes(Loja& loja) {
         opcao = obterInt("Escolha uma opção: ");
 
         switch (opcao) {
-            case 1: {
-                limparTela();
-                loja.listarClientes();
-                pausar();
-                break;
-            }
-            case 2: {
-                limparTela();
-                string nome = obterString("Nome do cliente: ");
-                string telefone = obterString("Telefone: ");
-                string morada = obterString("Morada: ");
+        case 1: {
+            limparTela();
+            loja.listarClientes();
+            pausar();
+            break;
+        }
+        case 2: {
+            limparTela();
+            string nome = obterString("Nome do cliente: ");
+            string telefone = obterString("Telefone: ");
+            string morada = obterString("Morada: ");
+            string cidade = obterString("Cidade: ");
 
-                int id = loja.adicionarCliente(nome, telefone, morada);
-                cout << "Cliente adicionado com ID: " << id << endl;
-                pausar();
-                break;
-            }
-            case 3: {
-                limparTela();
-                loja.listarClientes();
-                int id = obterInt("ID do cliente a alterar: ");
-                string novoNome = obterString("Novo nome: ");
+            int id = loja.adicionarCliente(nome, telefone, morada, cidade);
+            cout << "Cliente adicionado com ID: " << id << endl;
+            pausar();
+            break;
+        }
+        case 3: {
+            limparTela();
+            loja.listarClientes();
+            int id = obterInt("ID do cliente a alterar: ");
+            string novoNome = obterString("Novo nome: ");
 
-                if (loja.alterarNomeCliente(id, novoNome)) {
-                    cout << "Nome alterado com sucesso!\n";
-                } else {
-                    cout << "Cliente não encontrado!\n";
-                }
-                pausar();
-                break;
+            if (loja.alterarNomeCliente(id, novoNome)) {
+                cout << "Nome alterado com sucesso!\n";
             }
-            case 4: {
-                limparTela();
-                loja.listarClientes();
-                int id = obterInt("ID do cliente a remover: ");
+            else {
+                cout << "Cliente não encontrado!\n";
+            }
+            pausar();
+            break;
+        }
+        case 4: {
+            limparTela();
+            loja.listarClientes();
+            int id = obterInt("ID do cliente a remover: ");
 
-                if (loja.removerCliente(id)) {
-                    cout << "Cliente removido com sucesso!\n";
-                } else {
-                    cout << "Cliente não encontrado!\n";
-                }
-                pausar();
-                break;
+            if (loja.removerCliente(id)) {
+                cout << "Cliente removido com sucesso!\n";
             }
-            case 0:
-                break;
-            default:
-                cout << "Opção inválida!\n";
-                pausar();
+            else {
+                cout << "Cliente não encontrado!\n";
+            }
+            pausar();
+            break;
+        }
+        case 0:
+            break;
+        default:
+            cout << "Opção inválida!\n";
+            pausar();
         }
     } while (opcao != 0);
 }
@@ -231,84 +234,86 @@ void menuProdutos(Loja& loja) {
         opcao = obterInt("Escolha uma opção: ");
 
         switch (opcao) {
-            case 1: {
-                limparTela();
-                loja.listarProdutos();
+        case 1: {
+            limparTela();
+            loja.listarProdutos();
+            pausar();
+            break;
+        }
+        case 2: {
+            limparTela();
+            string nome = obterString("Nome do produto: ");
+            int quantidade = obterIntPositivo("Quantidade inicial: ");
+            float precoCusto = obterFloat("Preço de custo: ");
+
+            int id = loja.adicionarProduto(nome, quantidade, precoCusto);
+            cout << "Produto adicionado com ID: " << id << endl;
+            pausar();
+            break;
+        }
+        case 3: {
+            limparTela();
+            loja.listarProdutos();
+            int id = obterIntPositivo("ID do produto: ");
+            int quantidade = obterIntPositivo("Quantidade a adicionar: ");
+
+            if (loja.adicionarEstoque(id, quantidade)) {
+                cout << "Stock adicionado com sucesso!\n";
+            }
+            else {
+                cout << "Produto não encontrado ou quantidade inválida!\n";
+            }
+            pausar();
+            break;
+        }
+        case 4: {
+            limparTela();
+            loja.listarProdutos();
+
+            int id = obterInt("ID do produto: ");
+            const Produto* produto = loja.buscarProduto(id);
+
+            if (!produto) {
+                cout << "Produto com ID " << id << " não encontrado!\n";
                 pausar();
                 break;
             }
-            case 2: {
-                limparTela();
-                string nome = obterString("Nome do produto: ");
-                int quantidade = obterIntPositivo("Quantidade inicial: ");
-                float precoCusto = obterFloat("Preço de custo: ");
 
-                int id = loja.adicionarProduto(nome, quantidade, precoCusto);
-                cout << "Produto adicionado com ID: " << id << endl;
-                pausar();
-                break;
+            cout << "Produto atual: " << produto->getNome()
+                << " | Preço atual: " << fixed << setprecision(2)
+                << produto->getPrecoCusto() << " EUR\n";
+
+            float novoPreco = obterFloat("Novo preço de custo: ");
+
+            if (loja.atualizarPrecoProduto(id, novoPreco)) {
+                cout << "Preço atualizado com sucesso!\n";
             }
-            case 3: {
-                limparTela();
-                loja.listarProdutos();
-                int id = obterIntPositivo("ID do produto: ");
-                int quantidade = obterIntPositivo("Quantidade a adicionar: ");
-
-                if (loja.adicionarEstoque(id, quantidade)) {
-                    cout << "Stock adicionado com sucesso!\n";
-                } else {
-                    cout << "Produto não encontrado ou quantidade inválida!\n";
-                }
-                pausar();
-                break;
+            else {
+                cout << "Preço inválido!\n";
             }
-            case 4: {
-                limparTela();
-                loja.listarProdutos();
 
-                int id = obterInt("ID do produto: ");
-                const Produto* produto = loja.buscarProduto(id);
+            pausar();
+            break;
+        }
+        case 5: {
+            limparTela();
+            loja.listarProdutos();
+            int id = obterInt("ID do produto a remover: ");
 
-                if (!produto) {
-                    cout << "Produto com ID " << id << " não encontrado!\n";
-                    pausar();
-                    break;
-                }
-
-                cout << "Produto atual: " << produto->getNome()
-                    << " | Preço atual: " << fixed << setprecision(2)
-                    << produto->getPrecoCusto() << " EUR\n";
-
-                float novoPreco = obterFloat("Novo preço de custo: ");
-
-                if (loja.atualizarPrecoProduto(id, novoPreco)) {
-                    cout << "Preço atualizado com sucesso!\n";
-                }
-                else {
-                    cout << "Preço inválido!\n";
-                }
-
-                pausar();
-                break;
+            if (loja.removerProduto(id)) {
+                cout << "Produto removido com sucesso!\n";
             }
-            case 5: {
-                limparTela();
-                loja.listarProdutos();
-                int id = obterInt("ID do produto a remover: ");
-
-                if (loja.removerProduto(id)) {
-                    cout << "Produto removido com sucesso!\n";
-                } else {
-                    cout << "Produto não encontrado!\n";
-                }
-                pausar();
-                break;
+            else {
+                cout << "Produto não encontrado!\n";
             }
-            case 0:
-                break;
-            default:
-                cout << "Opção inválida!\n";
-                pausar();
+            pausar();
+            break;
+        }
+        case 0:
+            break;
+        default:
+            cout << "Opção inválida!\n";
+            pausar();
         }
     } while (opcao != 0);
 }
@@ -347,7 +352,8 @@ void menuVendas(Loja& loja) {
 
         if (loja.adicionarItemVenda(numeroFatura, idProduto, quantidade)) {
             cout << "Item adicionado à venda!\n";
-        } else {
+        }
+        else {
             cout << "Erro ao adicionar item (produto não encontrado ou stock insuficiente)!\n";
         }
 
@@ -365,17 +371,18 @@ void menuVendas(Loja& loja) {
     Venda* venda = loja.buscarVenda(numeroFatura);
     if (venda && venda->getNumItens() > 0) {
         cout << "Total a pagar: " << fixed << setprecision(2)
-                  << venda->getTotalComIVA() << " EUR\n";
+            << venda->getTotalComIVA() << " EUR\n";
 
         float valorEntregue;
         bool valorValido = false;
-        
+
         while (!valorValido) {
             valorEntregue = obterFloat("Valor entregue pelo cliente: ");
-            
+
             if (valorEntregue >= venda->getTotalComIVA()) {
                 valorValido = true;
-            } else {
+            }
+            else {
                 cout << "\n⚠️  VALOR INSUFICIENTE! ⚠️\n";
                 cout << "Valor entregue: " << fixed << setprecision(2) << valorEntregue << "€\n";
                 cout << "Valor necessário: " << fixed << setprecision(2) << venda->getTotalComIVA() << "€\n";
@@ -388,11 +395,13 @@ void menuVendas(Loja& loja) {
             limparTela();
             venda->imprimirTalao();
             pausar();
-        } else {
+        }
+        else {
             cout << "Erro ao finalizar venda!\n";
             pausar();
         }
-    } else {
+    }
+    else {
         cout << "Nenhum item foi adicionado à venda ou venda cancelada!\n";
         pausar();
     }
@@ -414,39 +423,39 @@ void menuRelatorios(Loja& loja) {
         opcao = obterInt("Escolha uma opção: ");
 
         switch (opcao) {
-            case 1: {
-                limparTela();
-                loja.relatorioStock();
-                pausar();
-                break;
-            }
-            case 2: {
-                limparTela();
-                cout << "Lista de produtos disponíveis para relatório:\n";
-                loja.listarProdutos();
+        case 1: {
+            limparTela();
+            loja.relatorioStock();
+            pausar();
+            break;
+        }
+        case 2: {
+            limparTela();
+            cout << "Lista de produtos disponíveis para relatório:\n";
+            loja.listarProdutos();
 
-                int idProduto = obterInt("Digite o ID do produto para gerar o relatório: ");
-                loja.relatorioVendasPorProduto(idProduto);
-                pausar();
-                break;
-            }
-            case 3: {
-                limparTela();
-                loja.relatorioTotalVendas();
-                pausar();
-                break;
-            }
-            case 4: {
-                limparTela();
-                loja.relatorioEstatisticasVendas();
-                pausar();
-                break;
-            }
-            case 0:
-                break;
-            default:
-                cout << "Opção inválida!\n";
-                pausar();
+            int idProduto = obterInt("Digite o ID do produto para gerar o relatório: ");
+            loja.relatorioVendasPorProduto(idProduto);
+            pausar();
+            break;
+        }
+        case 3: {
+            limparTela();
+            loja.relatorioTotalVendas();
+            pausar();
+            break;
+        }
+        case 4: {
+            limparTela();
+            loja.relatorioEstatisticasVendas();
+            pausar();
+            break;
+        }
+        case 0:
+            break;
+        default:
+            cout << "Opção inválida!\n";
+            pausar();
         }
     } while (opcao != 0);
 }
@@ -454,9 +463,9 @@ void menuRelatorios(Loja& loja) {
 // Função principal
 int main() {
     // Configura a localização para UTF-8 no Windows
-    #ifdef _WIN32
-        system("chcp 65001 > nul");
-    #endif
+#ifdef _WIN32
+    system("chcp 65001 > nul");
+#endif
 
     // Inicializa o gerador de números aleatórios
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -477,24 +486,24 @@ int main() {
         opcao = obterInt("Escolha uma opção: ");
 
         switch (opcao) {
-            case 1:
-                menuVendas(loja);
-                break;
-            case 2:
-                menuClientes(loja);
-                break;
-            case 3:
-                menuProdutos(loja);
-                break;
-            case 4:
-                menuRelatorios(loja);
-                break;
-            case 0:
-                cout << "Obrigado por usar o sistema!\n";
-                break;
-            default:
-                cout << "Opção inválida!\n";
-                pausar();
+        case 1:
+            menuVendas(loja);
+            break;
+        case 2:
+            menuClientes(loja);
+            break;
+        case 3:
+            menuProdutos(loja);
+            break;
+        case 4:
+            menuRelatorios(loja);
+            break;
+        case 0:
+            cout << "Obrigado por usar o sistema!\n";
+            break;
+        default:
+            cout << "Opção inválida!\n";
+            pausar();
         }
     } while (opcao != 0);
 

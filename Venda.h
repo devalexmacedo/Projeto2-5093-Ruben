@@ -15,10 +15,11 @@ struct ItemVenda {
     float precoSemIVA;
     float iva;
     float total;
-    
+
     // Construtor padrão para inicializar todas as variáveis
-    ItemVenda() : idProduto(0), quantidade(0), precoUnitario(0.0f), 
-                  precoSemIVA(0.0f), iva(0.0f), total(0.0f) {}
+    ItemVenda() : idProduto(0), quantidade(0), precoUnitario(0.0f),
+        precoSemIVA(0.0f), iva(0.0f), total(0.0f) {
+    }
 };
 
 class Venda {
