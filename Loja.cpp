@@ -12,7 +12,7 @@ using namespace std;
 Loja::Loja() : proximoIdCliente(1), proximoIdProduto(1), proximoNumeroFatura(1000), indiceVendaAtual(0) {
     inicializarDadosIniciais();
 }
-
+//Adiciona um novo cliente
 int Loja::adicionarCliente(const string& nome, const string& telefone, const string& morada, const string& cidade) {
     // Validação básica dos campos
     if (nome.empty() || all_of(nome.begin(), nome.end(), ::isspace)) {
