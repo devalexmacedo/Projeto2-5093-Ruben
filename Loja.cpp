@@ -13,11 +13,36 @@ Loja::Loja() : proximoIdCliente(1), proximoIdProduto(1), proximoNumeroFatura(100
     inicializarDadosIniciais();
 }
 
-// Adiciona um novo cliente
 int Loja::adicionarCliente(const string& nome, const string& telefone, const string& morada, const string& cidade) {
+    // Validação básica dos campos
+    if (nome.empty() || all_of(nome.begin(), nome.end(), ::isspace)) {
+        cout << "Nome inválido. Cliente não adicionado.\n";
+        return -1;
+    }
+    if (telefone.empty() || !all_of(telefone.begin(), telefone.end(), ::isdigit) || telefone.length() != 9) {
+        cout << "Telefone inválido. Cliente não adicionado.\n";
+        return -1;
+    }
+    if (morada.empty()) {
+        cout << "Morada inválida. Cliente não adicionado.\n";
+        return -1;
+    }
+    if (cidade.empty()) {
+        cout << "Cidade inválida. Cliente não adicionado.\n";
+        return -1;
+    }
+    // Verifica duplicidade de telefone
+    auto it = find_if(clientes.begin(), clientes.end(),
+        [&telefone](const Cliente& c) { return c.getTelefone() == telefone; });
+    if (it != clientes.end()) {
+        cout << "Já existe um cliente com esse telefone. Cliente não adicionado.\n";
+        return -1;
+    }
+    // Cria o novo cliente e adiciona à lista
     Cliente novoCliente(nome, telefone, morada, cidade);
     novoCliente.setId(proximoIdCliente);
     clientes.push_back(novoCliente);
+    cout << "Cliente adicionado com sucesso! ID: " << proximoIdCliente << "\n";
     return proximoIdCliente++;
 }
 
@@ -89,6 +114,26 @@ void Loja::listarClientes() const {
 
 // Adiciona um novo produto
 int Loja::adicionarProduto(const string& nome, int quantidade, float precoCusto) {
+    if (nome.empty() || all_of(nome.begin(),nome.end(), ::isspace)) {
+        cout << "Nome inválido. Produto não adicionado.\n";
+        return -1;
+    }
+    if (quantidade < 0) {
+        cout << "Quantidade inválida. Produto não adicionado.\n";
+        return -1;
+    }
+    if (precoCusto <= 0.0f) {
+        cout << "Preço de custo inválido. Produto não adicionado.\n";
+        return -1;
+    }
+    //Opcional: evita produtos duplicados com o mesmo nome
+    auto it = find_if(produtos.begin(), produtos.end(),
+        [&nome](const Produto& p) { return p.getNome() == nome; }); 
+    if (it != produtos.end()) {
+        cout << "Já existe um produto com esse nome. Produto não adicionado.\n";
+        return -1;
+    }
+    
     Produto novoProduto(nome, quantidade, precoCusto);
     novoProduto.setId(proximoIdProduto);
     produtos.push_back(novoProduto);
