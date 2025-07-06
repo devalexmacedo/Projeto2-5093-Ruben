@@ -167,6 +167,14 @@ void Venda::setData(const string& data) {
 
 // Adiciona um item à venda e recalcula os totais
 void Venda::adicionarItem(int idProduto, const string& nomeProduto, int quantidade, float precoCusto) {
+    if (quantidade <= 0) {
+        cout << "Quantidade deve ser maior que zero.\n";
+        return;
+    }
+    if (precoCusto <= 0.0f) {
+        cout << "Preço de custo deve ser maior que zero.\n";
+        return;
+    }
     // Calcula o preço de venda com margem de 30%
     float precoSemIVA = precoCusto * 1.3f;
     // Calcula o IVA de 23%
@@ -202,6 +210,12 @@ void Venda::calcularTotal() {
 
 // Processa o pagamento e calcula o troco
 void Venda::processarPagamento(float valorEntregue) {
+    if (valorEntregue < totalComIVA) {
+        cout << "Valor entregue insuficiente. Pagamento não processado.\n";
+        this->valorEntregue = valorEntregue;
+        this->troco = 0.0f;
+        return;
+    }
     this->valorEntregue = valorEntregue;
     this->troco = valorEntregue - totalComIVA;
 }
