@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Loja.h"
+#include "utilitario.h"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -10,41 +11,9 @@ using namespace std;
 
 // Construtor da classe Loja
 Loja::Loja() : proximoIdCliente(1), proximoIdProduto(1), proximoNumeroFatura(1000), indiceVendaAtual(0) {
-    inicializarDadosIniciais();
+    // inicializarDadosIniciais(); // REMOVIDO: Agora é chamado no main.cpp
 }
-//Adiciona um novo cliente
-int Loja::adicionarCliente(const string& nome, const string& telefone, const string& morada, const string& cidade) {
-    // Validação básica dos campos
-    if (nome.empty() || all_of(nome.begin(), nome.end(), ::isspace)) {
-        cout << "Nome inválido. Cliente não adicionado.\n";
-        return -1;
-    }
-    if (telefone.empty() || !all_of(telefone.begin(), telefone.end(), ::isdigit) || telefone.length() != 9) {
-        cout << "Telefone inválido. Cliente não adicionado.\n";
-        return -1;
-    }
-    if (morada.empty()) {
-        cout << "Morada inválida. Cliente não adicionado.\n";
-        return -1;
-    }
-    if (cidade.empty()) {
-        cout << "Cidade inválida. Cliente não adicionado.\n";
-        return -1;
-    }
-    // Verifica duplicidade de telefone
-    auto it = find_if(clientes.begin(), clientes.end(),
-        [&telefone](const Cliente& c) { return c.getTelefone() == telefone; });
-    if (it != clientes.end()) {
-        cout << "Já existe um cliente com esse telefone. Cliente não adicionado.\n";
-        return -1;
-    }
-    // Cria o novo cliente e adiciona à lista
-    Cliente novoCliente(nome, telefone, morada, cidade);
-    novoCliente.setId(proximoIdCliente);
-    clientes.push_back(novoCliente);
-    cout << "Cliente adicionado com sucesso! ID: " << proximoIdCliente << "\n";
-    return proximoIdCliente++;
-}
+
 
 // Remove um cliente pelo ID
 bool Loja::removerCliente(int id) {
@@ -113,32 +82,35 @@ void Loja::listarClientes() const {
 }
 
 // Adiciona um novo produto
-int Loja::adicionarProduto(const string& nome, int quantidade, float precoCusto) {
-    if (nome.empty() || all_of(nome.begin(),nome.end(), ::isspace)) {
-        cout << "Nome inválido. Produto não adicionado.\n";
+// NOVO: Adiciona um produto que não existe. APENAS CRIA.
+// Retorna o ID do novo produto, ou -1 se a quantidade/preço for inválida.
+int Loja::adicionarNovoProduto(const string& nome, int quantidade, float precoCusto) {
+    if (quantidade <= 0 || precoCusto <= 0.0f) {
+        // Validação básica: não se pode adicionar um produto novo sem quantidade ou preço
         return -1;
     }
-    if (quantidade < 0) {
-        cout << "Quantidade inválida. Produto não adicionado.\n";
-        return -1;
-    }
-    if (precoCusto <= 0.0f) {
-        cout << "Preço de custo inválido. Produto não adicionado.\n";
-        return -1;
-    }
-    //Opcional: evita produtos duplicados com o mesmo nome
-    auto it = find_if(produtos.begin(), produtos.end(),
-        [&nome](const Produto& p) { return p.getNome() == nome; }); 
-    if (it != produtos.end()) {
-        cout << "Já existe um produto com esse nome. Produto não adicionado.\n";
-        return -1;
-    }
-    
     Produto novoProduto(nome, quantidade, precoCusto);
     novoProduto.setId(proximoIdProduto);
     produtos.push_back(novoProduto);
     return proximoIdProduto++;
 }
+
+// MODIFICADO: Atualiza o stock e/ou preço de custo de um produto EXISTENTE.
+// Retorna true se atualizado, false se o produto não for encontrado.
+bool Loja::atualizarProduto(const string& nome, int quantidadeAdicional, float novoPrecoCusto) {
+    Produto* produtoExistente = buscarProdutoPorNome(nome);
+    if (produtoExistente) {
+        if (quantidadeAdicional > 0) {
+            produtoExistente->adicionarEstoque(quantidadeAdicional);
+        }
+        if (novoPrecoCusto > 0.0f) { // Permite atualizar para 0 se for o caso, mas >0 é mais comum
+            produtoExistente->setPrecoCusto(novoPrecoCusto);
+        }
+        return true; // Produto atualizado
+    }
+    return false; // Produto não encontrado para atualização
+}
+
 
 // Remove um produto pelo ID
 bool Loja::removerProduto(int id) {
@@ -414,7 +386,7 @@ void Loja::relatorioTotalVendas() const {
     }
     else {
         cout << "+===========+=============================+=============+======================+\n";
-        cout << "|   TOTAL   | " << totalVendas << " vendas realizadas         | VALOR TOTAL |" 
+        cout << "|   TOTAL   | " << totalVendas << " vendas realizadas         | VALOR TOTAL |"
             << right << setw(20) << fixed << setprecision(2) << valorTotalGeral << "€ |\n";
     }
 
@@ -426,7 +398,7 @@ void Loja::relatorioTotalVendas() const {
 void Loja::relatorioEstatisticasVendas() const {
     cout << "\n";
     cout << "+=======================================================================================+\n";
-    cout << "|                            ESTATISTICAS DE VENDAS                                    |\n";
+    cout << "|                               ESTATISTICAS DE VENDAS                                  |\n";
     cout << "+=======================================================================================+\n";
     cout << "\n";
 
@@ -557,16 +529,16 @@ void Loja::inicializarDadosIniciais() {
     adicionarCliente("Catarina Lopes", "989012345", "Largo do Municipio, 258", "Evora");
 
     // Adicionar produtos iniciais
-    adicionarProduto("Placa Mae ASUS B450", 15, 89.99f);
-    adicionarProduto("Processador AMD Ryzen 5", 12, 199.99f);
-    adicionarProduto("Memoria RAM 16GB DDR4", 25, 79.99f);
-    adicionarProduto("Disco SSD 1TB NVMe", 20, 87.94f);
-    adicionarProduto("Placa Grafica RTX 3060", 8, 399.99f);
-    adicionarProduto("Fonte 650W 80+ Bronze", 18, 71.95f);
-    adicionarProduto("Caixa ATX Mid Tower", 10, 59.99f);
-    adicionarProduto("Monitor 24'' Full HD", 15, 143.91f);
-    adicionarProduto("Teclado Mecanico RGB", 25, 89.99f);
-    adicionarProduto("Cooler CPU", 30, 29.99f);
+    adicionarNovoProduto("Placa Mae ASUS B450", 15, 89.99f);
+    adicionarNovoProduto("Processador AMD Ryzen 5", 12, 199.99f);
+    adicionarNovoProduto("Memoria RAM 16GB DDR4", 25, 79.99f);
+    adicionarNovoProduto("Disco SSD 1TB NVMe", 20, 87.94f);
+    adicionarNovoProduto("Placa Grafica RTX 3060", 8, 399.99f);
+    adicionarNovoProduto("Fonte 650W 80+ Bronze", 18, 71.95f);
+    adicionarNovoProduto("Caixa ATX Mid Tower", 10, 59.99f);
+    adicionarNovoProduto("Monitor 24'' Full HD", 15, 143.91f);
+    adicionarNovoProduto("Teclado Mecanico RGB", 25, 89.99f);
+    adicionarNovoProduto("Cooler CPU", 30, 29.99f);
 
     // Criar vendas iniciais
     criarVendasIniciais();
@@ -648,4 +620,19 @@ Venda* Loja::buscarVenda(int numeroFatura) {
 }
 
 
+// Adiciona um novo cliente
+int Loja::adicionarCliente(const string& nome, const string& telefone, const string& morada, const string& cidade) {
+    Cliente novoCliente(nome, telefone, morada, cidade);
+    novoCliente.setId(proximoIdCliente);
+    clientes.push_back(novoCliente);
+    // pausar(); // REMOVIDO: Não é necessário pausar para cada adição inicial
+    return proximoIdCliente++;
+}
 
+
+// Busca um produto pelo nome (versão não-const)
+Produto* Loja::buscarProdutoPorNome(const string& nome) {
+    auto it = find_if(produtos.begin(), produtos.end(),
+        [&nome](const Produto& p) { return compararStringsIgnorarCase(p.getNome(), nome); });
+    return (it != produtos.end()) ? &(*it) : nullptr;
+}

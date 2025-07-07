@@ -167,14 +167,6 @@ void Venda::setData(const string& data) {
 
 // Adiciona um item à venda e recalcula os totais
 void Venda::adicionarItem(int idProduto, const string& nomeProduto, int quantidade, float precoCusto) {
-    if (quantidade <= 0) {
-        cout << "Quantidade deve ser maior que zero.\n";
-        return;
-    }
-    if (precoCusto <= 0.0f) {
-        cout << "Preço de custo deve ser maior que zero.\n";
-        return;
-    }
     // Calcula o preço de venda com margem de 30%
     float precoSemIVA = precoCusto * 1.3f;
     // Calcula o IVA de 23%
@@ -210,14 +202,8 @@ void Venda::calcularTotal() {
 
 // Processa o pagamento e calcula o troco
 void Venda::processarPagamento(float valorEntregue) {
-    if (valorEntregue < totalComIVA) {
-        cout << "Valor entregue insuficiente. Pagamento não processado.\n";
-        this->valorEntregue = valorEntregue;
-        this->troco = 0.0f;
-        return;
-    }
     this->valorEntregue = valorEntregue;
-    this->troco = valorEntregue - totalComIVA;
+    this->troco = max(0.0f, valorEntregue - totalComIVA);
 }
 
 // Exibe o checkout e pede confirmação do cliente
@@ -269,23 +255,16 @@ void Venda::imprimirTalao() const {
     // Limpa a tela
     system("cls");
 
-    // Define a codificação de saída do console para UTF-8
-    SetConsoleOutputCP(CP_UTF8);
-    SetConsoleCP(CP_UTF8);
-
-    // Obtém o handle da console de saída padrão
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    // Define a cor do texto para preto (0) e o fundo para branco (15)
-    SetConsoleTextAttribute(hConsole, 0 | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
+    const string fundoBrancoTextoPreto = "\033[30;47m"; // Texto preto (30), fundo branco (47)
+    const string reset = "\033[0m";
 
     const int largura = 70; // Largura fixa do talao
 
-    // Bordas superior e inferior
     string linhaTopo = "+" + string(largura - 2, '-') + "+";
     string linhaFundo = "+" + string(largura - 2, '=') + "+";
 
-    // Cabecalho
+    // Cabeçalho com fundo branco
+    cout << fundoBrancoTextoPreto;
     cout << linhaTopo << "\n";
     cout << "|" << formatarLinha("LOJA DE INFORMATICA", largura - 2, ios::internal) << "|\n";
     cout << "|" << formatarLinha("Rua da Tecnologia, 123", largura - 2, ios::internal) << "|\n";
@@ -296,7 +275,6 @@ void Venda::imprimirTalao() const {
     cout << "|" << formatarLinha("TALAO DE COMPRA", largura - 2, ios::internal) << "|\n";
     cout << linhaFundo << "\n";
 
-    // Informacoes da fatura
     stringstream ss_fatura;
     ss_fatura << "Fatura No: " << numeroFatura;
     cout << "|" << formatarLinha(ss_fatura.str(), largura - 2, ios::left) << "|\n";
@@ -313,12 +291,10 @@ void Venda::imprimirTalao() const {
     cout << "|" << formatarLinha("No  PRODUTO                          QTD   PRECO    TOTAL", largura - 2, ios::left) << "|\n";
     cout << linhaFundo << "\n";
 
-    // Lista os produtos
     for (size_t i = 0; i < itens.size(); i++) {
         const auto& item = itens[i];
         stringstream ss_item;
         string nomeTruncado = item.nomeProduto;
-        // Ajusta o truncamento para considerar o comprimento visível
         if (getVisibleLength(nomeTruncado) > 27) {
             nomeTruncado = nomeTruncado.substr(0, 27) + "...";
         }
@@ -330,7 +306,6 @@ void Venda::imprimirTalao() const {
 
         cout << "|" << formatarLinha(ss_item.str(), largura - 2, ios::left) << "|\n";
 
-        // Separador entre itens
         if (i < itens.size() - 1) {
             cout << "|" << string(largura - 2, '*') << "|\n";
         }
@@ -338,7 +313,6 @@ void Venda::imprimirTalao() const {
 
     cout << linhaFundo << "\n";
 
-    // Linhas de totais e pagamento
     stringstream ss_subtotal;
     ss_subtotal << "Subtotal s/IVA: " << fixed << setprecision(2) << totalSemIVA << "EUR";
     cout << "|" << formatarLinha(ss_subtotal.str(), largura - 2, ios::right) << "|\n";
@@ -369,14 +343,10 @@ void Venda::imprimirTalao() const {
     cout << "|" << formatarLinha("OBRIGADO PELA SUA COMPRA!", largura - 2, ios::internal) << "|\n";
     cout << "|" << formatarLinha("VOLTE SEMPRE!", largura - 2, ios::internal) << "|\n";
     cout << "|" << formatarLinha("", largura - 2, ios::left) << "|\n";
-    cout << linhaTopo << "\n";
+    cout << linhaTopo << reset << "                                                                                              " << "\n"; // Reset final
 
-    // Restaura as cores padrão do console
-    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-
-    // Adiciona a pausa para o usuário pressionar uma tecla, sem linhas extras
-    cout << "\n"; // Adiciona uma quebra de linha para separar o talao da mensagem
-    system("pause"); // Equivalente a "Pressione qualquer tecla para continuar..."
+    cout << "\n";
+    system("pause");
 }
 
 // Verifica se a venda foi sorteada como gratis (25% de chance)

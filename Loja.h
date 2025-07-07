@@ -42,7 +42,9 @@ public:
     void listarClientes() const;
 
     // Gestão de Produtos
-    int adicionarProduto(const std::string& nome, int quantidade, float precoCusto);
+    int adicionarNovoProduto(const std::string& nome, int quantidade, float precoCusto);
+    bool atualizarProduto(const std::string& nome, int quantidadeAdicional, float novoPrecoCusto);
+    Produto* buscarProdutoPorNome(const std::string& nome);
     bool removerProduto(int id);
     bool adicionarEstoque(int id, int quantidade);
     bool atualizarPrecoProduto(int id, float novoPrecoCusto);

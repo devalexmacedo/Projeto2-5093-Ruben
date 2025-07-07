@@ -1,8 +1,4 @@
 #include "Produto.h"
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <cctype>
 
 using namespace std;
 
@@ -52,21 +48,11 @@ void Produto::setId(int newId) {
 
 // Define o nome do produto
 void Produto::setNome(const string& newNome) {
-    if (newNome.empty() || all_of(newNome.begin(), newNome.end(), [](unsigned char c){ return isspace(c); })) {
-        cout << "Nome do produto não pode ser vazio. Atribuindo 'Produto Desconhecido'." << endl;
-        nome = "Produto Desconhecido";
-    } else {
-        cout << "Nome do produto alterado para: " << newNome << endl;
-    }
     nome = newNome;
 }
 
 // Define o preço de custo e recalcula o preço de venda
 void Produto::setPrecoCusto(float newPrecoCusto) {
-    if (newPrecoCusto <= 0.0f) {
-        cout << "Preço de custo inválido. O preço não foi alterado." << endl;
-        return;
-    }
     precoCusto = newPrecoCusto;
     calcularPrecoVenda();
 }
