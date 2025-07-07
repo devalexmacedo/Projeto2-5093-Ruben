@@ -1,41 +1,38 @@
-#ifndef CLIENTE_H
-#define CLIENTE_H
+// Arquivo de definição da classe Cliente
+#pragma once  // Impede que o arquivo seja incluído mais de uma vez
 
 #include <string>
 
 using namespace std;
 
+// Representa um cliente do sistema com seus dados básicos
 class Cliente {
 private:
-    int id;
-    string nome;
-    string telefone;
-    string morada;
-    string cidade;
+    // Dados do cliente
+    int id;          // Código único de identificação
+    string nome;     // Nome completo
+    string telefone; // Telefone para contato
+    string morada;   // Endereço completo
+    string cidade;   // Cidade de residência
 
 public:
-    // Construtor padrão
+    // Construtor padrão - cria cliente vazio
     Cliente();
 
-    // Construtor com parâmetros
+    // Construtor completo - já preenche todos os dados
     Cliente(const string& nome, const string& telefone, const string& morada, const string& cidade);
 
-    // Métodos de acesso
-    int getId() const;
-    string getNome() const;
-    string getTelefone() const;
-    string getMorada() const;
-    string getCidade() const;
+    // Getters (métodos de consulta)
+    int getId() const;            // Retorna o ID
+    string getNome() const;       // Retorna o nome
+    string getTelefone() const;   // Retorna o telefone
+    string getMorada() const;     // Retorna o endereço
+    string getCidade() const;     // Retorna a cidade
 
-    // Métodos de modificação
-    void setId(int newId);
-    void setNome(const string& newNome);
-    void setTelefone(const string& newTelefone);
-    void setMorada(const string& newMorada);
-    void setCidade(const string& newCidade);
+    // Setters (métodos de modificação)
+    void setId(int newId);                    // Altera o ID
+    void setNome(const string& newNome);      // Altera o nome
+    void setTelefone(const string& newTelefone);  // Altera o telefone
+    void setMorada(const string& newMorada);  // Altera o endereço
+    void setCidade(const string& newCidade);  // Altera a cidade
 };
-
-#endif // CLIENTE_H
-
-
-

@@ -104,6 +104,13 @@ std::string obterString(const std::string& prompt) {
     return valor;
 }
 
+// Função auxiliar para formatar números com 2 casas decimais
+string formatarDecimal(float valor) {
+    stringstream ss;
+    ss << fixed << setprecision(2) << valor;
+    return ss.str();
+}
+
 void pausar() {
     std::cout << "\nPressione qualquer tecla para continuar...";
     (void)GETCH();
@@ -117,42 +124,44 @@ void limparTela() {
 #endif
 }
 
-// Implementações das funções de validação
-bool validarNome(const std::string& nome) {
-    if (nome.empty() || nome.length() > 20) {
+// --- Constantes para validação ---
+const int MAX_NOME = 50;       // Aumentado de 20 para 50 caracteres
+const int TAMANHO_TELEFONE = 9; // Padrão Português
+
+// --- Implementações Melhoradas ---
+
+bool validarNome(const string& nome) {
+    if (nome.empty() || nome.length() > MAX_NOME) {
         return false;
     }
-    for (char c : nome) {
-        if (!std::isalpha(c) && c != ' ') {
-            return false;
-        }
-    }
-    return true;
+
+    // Permite letras, espaços, hífens e apóstrofos
+    return all_of(nome.begin(), nome.end(), [](char c) {
+        return isalpha(c) || c == ' ' || c == '-' || c == '\'';
+        });
 }
 
-bool validarTelefone(const std::string& telefone) {
-    if (telefone.length() != 9) {
-        return false;
-    }
-    for (char c : telefone) {
-        if (!std::isdigit(c)) {
-            return false;
-        }
-    }
-    return true;
+bool validarTelefone(const string& telefone) {
+    // Aceita formatos: 912345678 ou +351912345678
+    if (telefone.empty()) return false;
+
+    // Verifica se todos os caracteres são dígitos (ou + no início)
+    size_t start = (telefone[0] == '+') ? 1 : 0;
+    return all_of(telefone.begin() + start, telefone.end(), ::isdigit);
 }
 
-bool validarMorada(const std::string& morada) {
-    if (morada.empty()) {
+bool validarMorada(const string& morada) {
+    if (morada.empty() || morada.length() > 100) {
         return false;
     }
-    for (char c : morada) {
-        if (!std::isalnum(c) && c != ' ' && c != ',' && c != '.' && c != '-') {
-            return false;
-        }
-    }
-    return true;
+
+    // Caracteres permitidos: alfanuméricos, espaços e alguns símbolos comuns
+    return all_of(morada.begin(), morada.end(), [](char c) {
+        return isalnum(c) || c == ' ' || c == ',' || c == '.' ||
+            c == '-' || c == 'º' || c == 'ª' || c == '/';
+        });
 }
+
 
 bool validarCidade(const std::string& cidade) {
     if (cidade.empty()) {
@@ -166,50 +175,208 @@ bool validarCidade(const std::string& cidade) {
     return true;
 }
 
-// Implementações das funções para obter entrada validada
-std::string obterNomeValido(const std::string& prompt) {
-    std::string valor;
+// Funções auxiliares (implementar em outro lugar)
+string normalizarEspacos(const string& input) {
+    string result;
+    bool ultimoEspaco = false;
+
+    for (char c : input) {
+        if (isspace(c)) {
+            if (!ultimoEspaco) {
+                result += ' ';
+                ultimoEspaco = true;
+            }
+        }
+        else {
+            result += c;
+            ultimoEspaco = false;
+        }
+    }
+
+    // Remove espaços no início/fim
+    if (!result.empty() && result.front() == ' ') {
+        result.erase(0, 1);
+    }
+    if (!result.empty() && result.back() == ' ') {
+        result.pop_back();
+    }
+
+    return result;
+}
+
+string normalizarNome(string nome) {
+    if (nome.empty()) return nome;
+
+    bool proximaMaiuscula = true;
+
+    for (char& c : nome) {
+        if (proximaMaiuscula && isalpha(c)) {
+            c = toupper(c);
+            proximaMaiuscula = false;
+        }
+        else {
+            c = tolower(c);
+        }
+
+        if (isspace(c) || c == '-' || c == '\'') {
+            proximaMaiuscula = true;
+        }
+    }
+
+    return nome;
+}
+
+
+string obterNomeValido(const string& prompt) {
+    const int MAX_CARACTERES = 50;
+    const int MIN_CARACTERES = 2;
+    string valor;
+    int tentativas = 0;
+
+    auto mostrarDicas = [&]() {
+        if (tentativas > 0) {
+            cout << "\n\033[1mDicas para nome válido:\033[0m\n"
+                << "- Entre " << MIN_CARACTERES << " e " << MAX_CARACTERES << " caracteres\n"
+                << "- Letras, espaços, hífens (-) e apóstrofos (')\n"
+                << "- \033[3mExemplos: João Silva, Maria-José, Carlos D'Avila\033[0m\n\n";
+        }
+        };
+
     do {
+        tentativas++;
+        mostrarDicas();
+
         valor = obterString(prompt);
+        valor = normalizarNome(normalizarEspacos(valor));
+
+        // Validação em etapas com mensagens específicas
+        if (valor.empty()) {
+            cout << "\033[31mErro: O nome não pode estar vazio.\033[0m\n";
+            continue;
+        }
+
+        if (valor.length() < MIN_CARACTERES) {
+            cout << "\033[31mErro: Nome muito curto. Mínimo de " << MIN_CARACTERES
+                << " caracteres.\033[0m\n";
+            continue;
+        }
+
+        if (valor.length() > MAX_CARACTERES) {
+            cout << "\033[31mErro: Nome muito longo. Máximo de " << MAX_CARACTERES
+                << " caracteres (digitou " << valor.length() << ").\033[0m\n";
+            continue;
+        }
+
         if (!validarNome(valor)) {
-            std::cout << "Erro: Nome inválido. Não pode ser vazio, máximo 20 caracteres e só pode conter letras.\n";
+            size_t pos_invalida;
+            for (pos_invalida = 0; pos_invalida < valor.length(); ++pos_invalida) {
+                char c = valor[pos_invalida];
+                if (!(isalpha(c) || c == ' ' || c == '-' || c == '\'')) {
+                    break;
+                }
+            }
+
+            cout << "\033[31mErro: Caractere inválido ('" << valor[pos_invalida]
+                << "') na posição " << (pos_invalida + 1) << ".\033[0m\n";
+            continue;
         }
-    } while (!validarNome(valor));
+
+        break; // Se todas as validações passarem
+
+    } while (true);
+
     return valor;
 }
 
-std::string obterTelefoneValido(const std::string& prompt) {
-    std::string valor;
+string obterTelefoneValido(const string& prompt) {
+    string valor;
+    bool valido = false;
+
     do {
         valor = obterString(prompt);
-        if (!validarTelefone(valor)) {
-            std::cout << "Erro: Telefone inválido. Deve conter exatamente 9 dígitos numéricos.\n";
+
+        // Remove caracteres não numéricos
+        string numeroLimpo;
+        for (char c : valor) {
+            if (isdigit(c)) {
+                numeroLimpo += c;
+            }
         }
-    } while (!validarTelefone(valor));
+
+        // Validação melhorada
+        if (numeroLimpo.empty()) {
+            cout << "Erro: O telefone não pode estar vazio.\n";
+        }
+        else if (numeroLimpo.length() != 9) {
+            cout << "Erro: Telefone deve conter 9 dígitos. Você digitou "
+                << numeroLimpo.length() << ".\n";
+        }
+        else if (numeroLimpo[0] != '9' && numeroLimpo[0] != '2') {
+            cout << "Erro: Telefone deve começar com 9 (móvel) ou 2 (fixo).\n";
+        }
+        else {
+            valido = true;
+            // Formata opcionalmente o número (91X XXX XXX ou 2XX XXX XXX)
+            if (valor.length() > 9) { // Se usuário digitou com espaços/hífens
+                valor = numeroLimpo.substr(0, 3) + " " +
+                    numeroLimpo.substr(3, 3) + " " +
+                    numeroLimpo.substr(6);
+            }
+        }
+    } while (!valido);
+
     return valor;
 }
 
-std::string obterMoradaValida(const std::string& prompt) {
-    std::string valor;
+string obterMoradaValida(const string& prompt) {
+    string valor;
+    bool primeiraTentativa = true;
+
     do {
+        if (!primeiraTentativa) {
+            cout << "\nDica: A morada deve conter:\n"
+                << "- Pelo menos 5 caracteres\n"
+                << "- Letras, números, espaços e estes símbolos: ,.-/ºª\n"
+                << "- Exemplo válido: Rua das Flores, 123 - 1ºD\n";
+        }
+        primeiraTentativa = false;
+
         valor = obterString(prompt);
+
         if (!validarMorada(valor)) {
-            std::cout << "Erro: Morada inválida. Não pode ser vazia e não deve conter símbolos (exceto vírgula).\n";
+            cout << "Erro: Morada inválida. Por favor, siga o formato indicado.\n";
         }
     } while (!validarMorada(valor));
+
+    // Normaliza espaços múltiplos
+    valor = normalizarEspacos(valor);
     return valor;
 }
 
-std::string obterCidadeValida(const std::string& prompt) {
-    std::string valor;
+string obterCidadeValida(const string& prompt) {
+    string valor;
+    bool primeiraTentativa = true;
+
     do {
+        if (!primeiraTentativa) {
+            cout << "\nDica: O nome da cidade deve:\n"
+                << "- Conter apenas letras, espaços e hífens\n"
+                << "- Ter entre 2 e 50 caracteres\n"
+                << "- Exemplos válidos: Lisboa, Porto, Vila Nova de Gaia\n";
+        }
+        primeiraTentativa = false;
+
         valor = obterString(prompt);
+        valor = normalizarNome(valor); // Capitaliza corretamente
+
         if (!validarCidade(valor)) {
-            std::cout << "Erro: Cidade inválida. Só pode conter letras.\n";
+            cout << "Erro: Cidade inválida. Por favor, siga o formato indicado.\n";
         }
     } while (!validarCidade(valor));
+
     return valor;
 }
+
 
 // Implementação da função auxiliar de comparação de strings
 bool compararStringsIgnorarCase(const std::string& s1, const std::string& s2) {

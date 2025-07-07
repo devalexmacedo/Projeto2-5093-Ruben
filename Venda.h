@@ -1,5 +1,4 @@
-#ifndef VENDA_H
-#define VENDA_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -21,6 +20,7 @@ struct ItemVenda {
         precoSemIVA(0.0f), iva(0.0f), total(0.0f) {
     }
 };
+
 
 class Venda {
 private:
@@ -65,7 +65,7 @@ public:
 
     const ItemVenda* getItem(int index) const;
     const ItemVenda* getItem(size_t index) const; // Sobrecarga para compatibilidade
+
 };
 
-#endif // VENDA_H
 

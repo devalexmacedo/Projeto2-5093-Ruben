@@ -10,7 +10,7 @@
 using namespace std;
 
 // Construtor da classe Loja
-Loja::Loja() : proximoIdCliente(1), proximoIdProduto(1), proximoNumeroFatura(1000), indiceVendaAtual(0) {
+Loja::Loja() : proximoIdCliente(1), proximoIdProduto(1), proximoNumeroFatura(1000) {
     // inicializarDadosIniciais(); // REMOVIDO: Agora é chamado no main.cpp
 }
 
@@ -36,6 +36,8 @@ bool Loja::alterarNomeCliente(int id, const string& novoNome) {
     }
     return false;
 }
+
+
 
 // Lista todos os clientes cadastrados
 void Loja::listarClientes() const {
@@ -82,7 +84,6 @@ void Loja::listarClientes() const {
 }
 
 // Adiciona um novo produto
-// NOVO: Adiciona um produto que não existe. APENAS CRIA.
 // Retorna o ID do novo produto, ou -1 se a quantidade/preço for inválida.
 int Loja::adicionarNovoProduto(const string& nome, int quantidade, float precoCusto) {
     if (quantidade <= 0 || precoCusto <= 0.0f) {
@@ -95,7 +96,7 @@ int Loja::adicionarNovoProduto(const string& nome, int quantidade, float precoCu
     return proximoIdProduto++;
 }
 
-// MODIFICADO: Atualiza o stock e/ou preço de custo de um produto EXISTENTE.
+// Atualiza o stock e/ou preço de custo de um produto EXISTENTE.
 // Retorna true se atualizado, false se o produto não for encontrado.
 bool Loja::atualizarProduto(const string& nome, int quantidadeAdicional, float novoPrecoCusto) {
     Produto* produtoExistente = buscarProdutoPorNome(nome);
@@ -236,22 +237,17 @@ void Loja::relatorioStock() const {
     cout << "\n";
 }
 
-// Cria uma nova venda
+// Cria uma nova venda com FIFO automático
 int Loja::criarVenda(int idCliente) {
-    Venda novaVenda(proximoNumeroFatura, idCliente);
+    Venda novaVenda(proximoNumeroFatura++, idCliente);  // Incrementa logo o número
 
-    // Implementa estrutura circular: quando atinge 100 vendas, sobrescreve a mais antiga
-    if (static_cast<int>(vendas.size()) < MAX_VENDAS) {
-        vendas.push_back(novaVenda);
-        indiceVendaAtual = static_cast<int>(vendas.size()) - 1;
+    // FIFO automático - deque cuida da lógica circular
+    if (vendas.size() >= LIMITE_VENDAS) {
+        vendas.pop_front();  // Remove a mais antiga automaticamente
     }
-    else {
-        // Sobrescreve a venda mais antiga (estrutura circular)
-        vendas[indiceVendaAtual % MAX_VENDAS] = novaVenda;
-        indiceVendaAtual = (indiceVendaAtual + 1) % MAX_VENDAS;
-    }
+    vendas.push_back(novaVenda);  // Adiciona a nova
 
-    return proximoNumeroFatura++;
+    return novaVenda.getNumeroFatura();
 }
 
 // Adiciona um item a uma venda existente
@@ -539,42 +535,157 @@ void Loja::inicializarDadosIniciais() {
     adicionarNovoProduto("Monitor 24'' Full HD", 15, 143.91f);
     adicionarNovoProduto("Teclado Mecanico RGB", 25, 89.99f);
     adicionarNovoProduto("Cooler CPU", 30, 29.99f);
+    adicionarNovoProduto("Webcam Full HD", 20, 35.50f);
+    adicionarNovoProduto("Rato Gaming", 30, 25.00f);
+    adicionarNovoProduto("Headset com Microfone", 15, 49.99f);
+    adicionarNovoProduto("Router Wi-Fi 6", 10, 75.00f);
+    adicionarNovoProduto("Cartucho Tinta Preto", 50, 15.00f);
+    adicionarNovoProduto("Pen Drive 64GB", 40, 10.00f);
+    adicionarNovoProduto("Disco Externo 2TB", 8, 95.00f);
+    adicionarNovoProduto("Cabo HDMI 2m", 60, 8.00f);
+    adicionarNovoProduto("Adaptador USB-C para HDMI", 25, 18.00f);
 
     // Criar vendas iniciais
     criarVendasIniciais();
 }
 
-// Função auxiliar para criar vendas iniciais
+// Função auxiliar para criar vendas iniciais de exemplo.
 void Loja::criarVendasIniciais() {
-    // Venda 1: João Silva
+    // Venda 1: João Silva (ID 1)
     int fatura1 = criarVenda(1);
-    adicionarItemVenda(fatura1, 1, 1); // Placa Mãe
-    adicionarItemVenda(fatura1, 2, 1); // Processador
-    adicionarItemVenda(fatura1, 3, 2); // 2x RAM
+    adicionarItemVenda(fatura1, 1, 1);  // Placa Mãe ASUS B450
+    adicionarItemVenda(fatura1, 2, 1);  // Processador AMD Ryzen 5
+    adicionarItemVenda(fatura1, 3, 2);  // Memoria RAM 16GB DDR4
     finalizarVendaSilenciosa(fatura1, 500.0f);
 
-    // Venda 2: Maria Santos
+    // Venda 2: Maria Santos (ID 2)
     int fatura2 = criarVenda(2);
-    adicionarItemVenda(fatura2, 8, 1); // Monitor
-    adicionarItemVenda(fatura2, 7, 1); // Caixa
+    adicionarItemVenda(fatura2, 8, 1);  // Monitor 24'' Full HD
+    adicionarItemVenda(fatura2, 7, 1);  // Caixa ATX Mid Tower
     finalizarVendaSilenciosa(fatura2, 250.0f);
 
-    // Venda 3: Pedro Costa
+    // Venda 3: Pedro Costa (ID 3)
     int fatura3 = criarVenda(3);
-    adicionarItemVenda(fatura3, 4, 2); // 2x SSD
-    adicionarItemVenda(fatura3, 6, 1); // Fonte
+    adicionarItemVenda(fatura3, 4, 2);  // Disco SSD 1TB NVMe
+    adicionarItemVenda(fatura3, 6, 1);  // Fonte 650W 80+ Bronze
     finalizarVendaSilenciosa(fatura3, 300.0f);
 
-    // Venda 4: Ana Rodrigues
+    // Venda 4: Ana Rodrigues (ID 4)
     int fatura4 = criarVenda(4);
-    adicionarItemVenda(fatura4, 5, 1); // Placa Gráfica RTX 3060
+    adicionarItemVenda(fatura4, 5, 1);  // Placa Grafica RTX 3060
     finalizarVendaSilenciosa(fatura4, 520.0f);
 
-    // Venda 5: Carlos Mendes
+    // Venda 5: Carlos Mendes (ID 5)
     int fatura5 = criarVenda(5);
-    adicionarItemVenda(fatura5, 7, 1); // Caixa
-    adicionarItemVenda(fatura5, 10, 2); // 2x Cooler
+    adicionarItemVenda(fatura5, 7, 1);  // Caixa ATX Mid Tower
+    adicionarItemVenda(fatura5, 10, 2); // Cooler CPU
     finalizarVendaSilenciosa(fatura5, 150.0f);
+
+    // Venda 6: Sofia Pereira (ID 6)
+    int fatura6 = criarVenda(6);
+    adicionarItemVenda(fatura6, 11, 1); // Webcam Full HD
+    adicionarItemVenda(fatura6, 12, 1); // Rato Gaming
+    finalizarVendaSilenciosa(fatura6, 70.0f);
+
+    // Venda 7: Miguel Ferreira (ID 7)
+    int fatura7 = criarVenda(7);
+    adicionarItemVenda(fatura7, 13, 1); // Headset com Microfone
+    finalizarVendaSilenciosa(fatura7, 60.0f);
+
+    // Venda 8: Catarina Lopes (ID 8)
+    int fatura8 = criarVenda(8);
+    adicionarItemVenda(fatura8, 14, 1); // Router Wi-Fi 6
+    finalizarVendaSilenciosa(fatura8, 90.0f);
+
+    // Venda 9: Rui Almeida (ID 9)
+    int fatura9 = criarVenda(9);
+    adicionarItemVenda(fatura9, 15, 1); // Impressora Multifunções
+    adicionarItemVenda(fatura9, 16, 2); // Cartucho Tinta Preto
+    finalizarVendaSilenciosa(fatura9, 180.0f);
+
+    // Venda 10: Beatriz Sousa (ID 10)
+    int fatura10 = criarVenda(10);
+    adicionarItemVenda(fatura10, 17, 5); // Pen Drive 64GB
+    adicionarItemVenda(fatura10, 18, 1); // Disco Externo 2TB
+    finalizarVendaSilenciosa(fatura10, 170.0f);
+
+    // Venda 11: João Silva (ID 1)
+    int fatura11 = criarVenda(1);
+    adicionarItemVenda(fatura11, 19, 5); // Cabo HDMI 2m
+    finalizarVendaSilenciosa(fatura11, 50.0f);
+
+    // Venda 12: Maria Santos (ID 2)
+    int fatura12 = criarVenda(2);
+    adicionarItemVenda(fatura12, 20, 2); // Adaptador USB-C para HDMI
+    finalizarVendaSilenciosa(fatura12, 45.0f);
+
+    // Venda 13: Pedro Costa (ID 3)
+    int fatura13 = criarVenda(3);
+    adicionarItemVenda(fatura13, 9, 1); // Teclado Mecanico RGB
+    finalizarVendaSilenciosa(fatura13, 110.0f);
+
+    // Venda 14: Ana Rodrigues (ID 4)
+    int fatura14 = criarVenda(4);
+    adicionarItemVenda(fatura14, 1, 1); // Placa Mae ASUS B450
+    adicionarItemVenda(fatura14, 4, 1); // Disco SSD 1TB NVMe
+    finalizarVendaSilenciosa(fatura14, 220.0f);
+
+    // Venda 15: Carlos Mendes (ID 5)
+    int fatura15 = criarVenda(5);
+    adicionarItemVenda(fatura15, 12, 2); // Rato Gaming
+    finalizarVendaSilenciosa(fatura15, 60.0f);
+
+    // Venda 16: Sofia Pereira (ID 6)
+    int fatura16 = criarVenda(6);
+    adicionarItemVenda(fatura16, 16, 3); // Cartucho Tinta Preto
+    finalizarVendaSilenciosa(fatura16, 55.0f);
+
+    // Venda 17: Miguel Ferreira (ID 7)
+    int fatura17 = criarVenda(7);
+    adicionarItemVenda(fatura17, 5, 1); // Placa Grafica RTX 3060
+    finalizarVendaSilenciosa(fatura17, 520.0f);
+
+    // Venda 18: Catarina Lopes (ID 8)
+    int fatura18 = criarVenda(8);
+    adicionarItemVenda(fatura18, 8, 1); // Monitor 24'' Full HD
+    finalizarVendaSilenciosa(fatura18, 180.0f);
+
+    // Venda 19: Rui Almeida (ID 9)
+    int fatura19 = criarVenda(9);
+    adicionarItemVenda(fatura19, 1, 1); // Placa Mae ASUS B450
+    finalizarVendaSilenciosa(fatura19, 110.0f);
+
+    // Venda 20: Beatriz Sousa (ID 10)
+    int fatura20 = criarVenda(10);
+    adicionarItemVenda(fatura20, 2, 1); // Processador AMD Ryzen 5
+    finalizarVendaSilenciosa(fatura20, 250.0f);
+
+    // Venda 21: João Silva (ID 1)
+    int fatura21 = criarVenda(1);
+    adicionarItemVenda(fatura21, 10, 2); // Cooler CPU
+    finalizarVendaSilenciosa(fatura21, 75.0f);
+
+    // Venda 22: Pedro Costa (ID 3)
+    int fatura22 = criarVenda(3);
+    adicionarItemVenda(fatura22, 11, 1); // Webcam Full HD
+    adicionarItemVenda(fatura22, 13, 1); // Headset com Microfone
+    finalizarVendaSilenciosa(fatura22, 100.0f);
+
+    // Venda 23: Carlos Mendes (ID 5)
+    int fatura23 = criarVenda(5);
+    adicionarItemVenda(fatura23, 18, 1); // Disco Externo 2TB
+    finalizarVendaSilenciosa(fatura23, 120.0f);
+
+    // Venda 24: Miguel Ferreira (ID 7)
+    int fatura24 = criarVenda(7);
+    adicionarItemVenda(fatura24, 19, 10); // Cabo HDMI 2m
+    finalizarVendaSilenciosa(fatura24, 100.0f);
+
+    // Venda 25: Rui Almeida (ID 9)
+    int fatura25 = criarVenda(9);
+    adicionarItemVenda(fatura25, 6, 1); // Fonte 650W 80+ Bronze
+    adicionarItemVenda(fatura25, 7, 1); // Caixa ATX Mid Tower
+    finalizarVendaSilenciosa(fatura25, 160.0f);
 }
 
 // Busca um cliente pelo ID (versão const)

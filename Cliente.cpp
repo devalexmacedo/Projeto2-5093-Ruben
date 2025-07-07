@@ -1,63 +1,61 @@
-#include "Cliente.h"
+#include "Cliente.h" // Inclui o cabeçalho da classe Cliente
 
-using namespace std;
+using namespace std; // Usa o namespace padrão para facilitar o acesso a string, vector, etc.
 
-// Construtor padrão
+// Construtor padrão da classe Cliente.
 Cliente::Cliente() : id(0) {}
 
-// Construtor com parâmetros
+// Construtor com parâmetros da classe Cliente.
 Cliente::Cliente(const string& nome, const string& telefone, const string& morada, const string& cidade)
-    : nome(nome), telefone(telefone), morada(morada), cidade(cidade), id(0) {}
+    : nome(nome), telefone(telefone), morada(morada), cidade(cidade), id(0) {
+}
 
-// Retorna o ID do cliente
+// Método de acesso (getter) para o ID do cliente.
 int Cliente::getId() const {
     return id;
 }
 
-// Retorna o nome do cliente
+// Método de acesso (getter) para o nome do cliente.
 string Cliente::getNome() const {
     return nome;
 }
 
-// Retorna o telefone do cliente
+// Método de acesso (getter) para o telefone do cliente.
 string Cliente::getTelefone() const {
     return telefone;
 }
 
-// Retorna a morada do cliente
+// Método de acesso (getter) para a morada (endereço) do cliente.
 string Cliente::getMorada() const {
     return morada;
 }
 
-// Retorna a cidade do cliente
+// Método de acesso (getter) para a cidade do cliente.
 string Cliente::getCidade() const {
     return cidade;
 }
 
-// Define o ID do cliente
+// Método de modificação (setter) para o ID do cliente.
 void Cliente::setId(int newId) {
     id = newId;
 }
 
-// Define o nome do cliente
+// Método de modificação (setter) para o nome do cliente.
 void Cliente::setNome(const string& newNome) {
     nome = newNome;
 }
 
-// Define o telefone do cliente
+// Método de modificação (setter) para o telefone do cliente.
 void Cliente::setTelefone(const string& newTelefone) {
     telefone = newTelefone;
 }
 
-// Define a morada do cliente
+// Método de modificação (setter) para a morada do cliente.
 void Cliente::setMorada(const string& newMorada) {
     morada = newMorada;
 }
 
-// Define a cidade do cliente
+// Método de modificação (setter) para a cidade do cliente.
 void Cliente::setCidade(const string& newCidade) {
     cidade = newCidade;
 }
-
-
-

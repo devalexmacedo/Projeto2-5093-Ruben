@@ -1,73 +1,75 @@
-#ifndef LOJA_H
-#define LOJA_H
+#pragma once  // Previne inclusões múltiplas
 
-#include <string>
-#include <vector>
 #include "Cliente.h"
 #include "Produto.h"
 #include "Venda.h"
+#include <vector>
+#include <string>
+#include <deque>
 
+using namespace std;
+
+//Limitar a 100 vendas e usar o FIFO;
+constexpr size_t LIMITE_VENDAS = 100;
+
+// Classe principal que gerencia toda a operação da loja
 class Loja {
 private:
-    std::vector<Cliente> clientes;
-    std::vector<Produto> produtos;
-    std::vector<Venda> vendas;
+    // Dados armazenados
+    vector<Cliente> clientes;      // Cadastro de clientes
+    vector<Produto> produtos;      // Catálogo de produtos
+    deque<Venda> vendas;        // Histórico de vendas
 
-    int proximoIdCliente;
-    int proximoIdProduto;
-    int proximoNumeroFatura;
-    int indiceVendaAtual;
-
-    static const int MAX_VENDAS = 100;
+    // Contadores para IDs
+    int proximoIdCliente = 1;           // Próximo ID para novo cliente
+    int proximoIdProduto = 1;           // Próximo ID para novo produto
+    int proximoNumeroFatura = 1;        // Número da próxima fatura
 
 public:
-    Loja();
+    // Inicialização
+    Loja();  // Construtor padrão
 
-    // Versões não-const para modificação
-    Cliente* buscarCliente(int id);
-    Produto* buscarProduto(int id);
-    Venda* buscarVenda(int numeroFatura);
-
-    // Versões const para acesso somente leitura
-    const Cliente* buscarCliente(int id) const;
-    const Produto* buscarProduto(int id) const;
-    const Venda* buscarVenda(int numeroFatura) const;
-
-    void inicializarDadosIniciais();
-
-    // Gestão de Clientes
-    int adicionarCliente(const std::string& nome, const std::string& telefone, const std::string& morada, const std::string& cidade);
+    // === Gestão de Clientes ===
+    int adicionarCliente(const std::string& nome, const std::string& telefone,
+        const string& morada, const string& cidade);
     bool removerCliente(int id);
-    bool alterarNomeCliente(int id, const std::string& novoNome);
+    bool alterarNomeCliente(int id, const string& novoNome);
     void listarClientes() const;
 
-    // Gestão de Produtos
-    int adicionarNovoProduto(const std::string& nome, int quantidade, float precoCusto);
-    bool atualizarProduto(const std::string& nome, int quantidadeAdicional, float novoPrecoCusto);
-    Produto* buscarProdutoPorNome(const std::string& nome);
+    // === Gestão de Produtos ===
+    int adicionarNovoProduto(const string& nome, int quantidade, float precoCusto);
+    bool atualizarProduto(const string& nome, int quantidadeAdicional, float novoPrecoCusto);
     bool removerProduto(int id);
     bool adicionarEstoque(int id, int quantidade);
     bool atualizarPrecoProduto(int id, float novoPrecoCusto);
     void listarProdutos() const;
+    void relatorioStock() const;
 
-    // Gestão de Vendas
+    // === Processamento de Vendas ===
     int criarVenda(int idCliente);
     bool adicionarItemVenda(int numeroFatura, int idProduto, int quantidade);
     bool finalizarVenda(int numeroFatura, float valorEntregue);
-    bool finalizarVendaSilenciosa(int numeroFatura, float valorEntregue); // Para vendas iniciais
+    bool finalizarVendaSilenciosa(int numeroFatura, float valorEntregue); // Para testes
 
-    // Relatórios
-    void relatorioStock() const;
+    // === Relatórios ===
     void relatorioVendasPorProduto(int idProduto) const;
     void relatorioTotalVendas() const;
-    void relatorioEstatisticasVendas() const; // Novo: produto mais/menos vendido, lucros, melhor cliente
+    void relatorioEstatisticasVendas() const;
+
+    // === Buscas ===
+    // Versões const (para consulta) e não-const (para modificação)
+    const Cliente* buscarCliente(int id) const;
+    Cliente* buscarCliente(int id);
+    const Produto* buscarProduto(int id) const;
+    Produto* buscarProduto(int id);
+    const Venda* buscarVenda(int numeroFatura) const;
+    Venda* buscarVenda(int numeroFatura);
+    Produto* buscarProdutoPorNome(const string& nome);
+
+    // === Inicialização ===
+    void inicializarDadosIniciais();  // Carrega dados de exemplo
 
 private:
-    // Função auxiliar para criar vendas iniciais
-    void criarVendasIniciais();
+    // Métodos internos
+    void criarVendasIniciais();  // Popula vendas iniciais para demonstração
 };
-
-#endif // LOJA_H
-
-
-
