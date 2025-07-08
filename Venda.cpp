@@ -285,12 +285,29 @@ bool Venda::verificarVendaGratis() const {
 }
 
 // Retorna um ponteiro constante para um item específico da venda pelo índice.
-const ItemVenda* Venda::getItem(int index) const {
+const ItemVenda* Venda::getItem(int index) const{
     if (index >= 0 && index < static_cast<int>(itens.size())) {
         return &itens[index];
     }
     return nullptr; // Retorna nullptr se o índice for inválido.
 }
+
+// Implementação da versão NÃO-CONST para modificar itens
+ItemVenda* Venda::getItem(int index) {
+    if (index >= 0 && index < static_cast<int>(itens.size())) {
+        return &itens[index];
+    }
+    return nullptr;
+}
+
+// Implementação da sobrecarga NÃO-CONST para size_t
+ItemVenda* Venda::getItem(size_t index) {
+    if (index < itens.size()) {
+        return &itens[index];
+    }
+    return nullptr;
+}
+
 
 // Sobrecarga de getItem para aceitar size_t como índice.
 const ItemVenda* Venda::getItem(size_t index) const {

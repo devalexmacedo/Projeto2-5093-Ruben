@@ -66,6 +66,10 @@ public:
     const ItemVenda* getItem(int index) const;
     const ItemVenda* getItem(size_t index) const; // Sobrecarga para compatibilidade
 
+    // Métodos de acesso (NÃO-CONSTANTES, para modificação)
+    ItemVenda* getItem(int index);
+    ItemVenda* getItem(size_t index);
+
 };
 
 

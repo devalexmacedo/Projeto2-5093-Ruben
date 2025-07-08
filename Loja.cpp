@@ -251,19 +251,37 @@ int Loja::criarVenda(int idCliente) {
 
 // Adiciona um item a uma venda existente
 bool Loja::adicionarItemVenda(int numeroFatura, int idProduto, int quantidade) {
-    Venda* venda = buscarVenda(numeroFatura);
-    if (!venda) return false;
+    Venda* venda = buscarVenda(numeroFatura); // Busca a venda pelo número da fatura
+    if (!venda) return false; // Retorna falso se a venda não for encontrada
 
-    Produto* produto = buscarProduto(idProduto);
-    if (!produto) return false;
+    Produto* produto = buscarProduto(idProduto); // Busca o produto pelo ID
+    if (!produto) return false; // Retorna falso se o produto não for encontrado
 
-    if (!produto->temEstoqueSuficiente(quantidade)) {
-        return false;
+    if (!produto->temEstoqueSuficiente(quantidade)) { // Verifica se há estoque suficiente
+        return false; // Retorna falso se não houver estoque suficiente
     }
 
-    venda->adicionarItem(idProduto, produto->getNome(), quantidade, produto->getPrecoCusto());
-    produto->removerEstoque(quantidade);
-    return true;
+    // Verifica se o produto já existe na venda
+    ItemVenda* itemExistente = nullptr; // Inicializa um ponteiro para um item de venda existente como nulo
+    for (int i = 0; i < venda->getNumItens(); ++i) { // Itera sobre os itens existentes na venda
+        if (venda->getItem(i)->idProduto == idProduto) { // Se o ID do produto do item existente for igual ao ID do produto a ser adicionado
+            itemExistente = venda->getItem(i); // Atribui o item existente ao ponteiro
+            break; // Sai do loop
+        }
+    }
+
+    if (itemExistente) {
+        // Se o produto existir, atualiza sua quantidade e total
+        itemExistente->quantidade += quantidade; // Adiciona a nova quantidade à quantidade existente
+        itemExistente->total = itemExistente->quantidade * produto->getPrecoVenda(); // Recalcula o total do item, assumindo que o total deve ser baseado no preço de venda do produto
+    }
+    else {
+        // Se o produto não existir, adiciona um novo item
+        venda->adicionarItem(idProduto, produto->getNome(), quantidade, produto->getPrecoCusto()); // Adiciona um novo item à venda
+    }
+
+    produto->removerEstoque(quantidade); // Remove a quantidade do estoque do produto
+    return true; // Retorna verdadeiro indicando sucesso
 }
 
 // Finaliza uma venda processando o pagamento
