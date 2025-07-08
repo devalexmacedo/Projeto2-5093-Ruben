@@ -234,6 +234,7 @@ string obterNomeValido(const string& prompt) {
     int tentativas = 0;
 
     auto mostrarDicas = [&]() {
+        limparTela();
         if (tentativas > 0) {
             cout << "\n\033[1mDicas para nome válido:\033[0m\n"
                 << "- Entre " << MIN_CARACTERES << " e " << MAX_CARACTERES << " caracteres\n"
@@ -290,12 +291,28 @@ string obterNomeValido(const string& prompt) {
 
 string obterTelefoneValido(const string& prompt) {
     string valor;
-    bool valido = false;
+    int tentativas = 0;
+    const int TAMANHO_TELEFONE = 9;
+
+    auto mostrarDicas = [&]() {
+        limparTela();
+        cout << "=== INFORMAÇÕES DE CONTATO ===\n\n";
+        if (tentativas > 0) {
+            cout << "\033[1;33mFORMATO VÁLIDO:\033[0m\n";
+            cout << "- Deve conter exatamente " << TAMANHO_TELEFONE << " dígitos\n";
+            cout << "- Iniciar com 9 (móvel) ou 2 (fixo)\n";
+            cout << "- Pode incluir espaços, hífens ou parênteses\n";
+            cout << "- \033[3mExemplos: 912345678, 21 1234 5678, (21) 1234-5678\033[0m\n\n";
+        }
+        };
 
     do {
-        valor = obterString(prompt);
+        tentativas++;
+        mostrarDicas();
+        cout << prompt;
+        getline(cin, valor);
 
-        // Remove caracteres não numéricos
+        // Remove todos os não-dígitos
         string numeroLimpo;
         for (char c : valor) {
             if (isdigit(c)) {
@@ -303,76 +320,159 @@ string obterTelefoneValido(const string& prompt) {
             }
         }
 
-        // Validação melhorada
+        // Validação em etapas
         if (numeroLimpo.empty()) {
-            cout << "Erro: O telefone não pode estar vazio.\n";
+            cout << "\033[31mErro: O telefone não pode estar vazio.\033[0m\n";
+            pausar();
+            continue;
         }
-        else if (numeroLimpo.length() != 9) {
-            cout << "Erro: Telefone deve conter 9 dígitos. Você digitou "
-                << numeroLimpo.length() << ".\n";
+
+        if (numeroLimpo.length() != TAMANHO_TELEFONE) {
+            cout << "\033[31mErro: Telefone deve ter exatamente " << TAMANHO_TELEFONE
+                << " dígitos. Você digitou " << numeroLimpo.length() << ".\033[0m\n";
+            pausar();
+            continue;
         }
-        else if (numeroLimpo[0] != '9' && numeroLimpo[0] != '2') {
-            cout << "Erro: Telefone deve começar com 9 (móvel) ou 2 (fixo).\n";
+
+        if (numeroLimpo[0] != '9' && numeroLimpo[0] != '2') {
+            cout << "\033[31mErro: Deve começar com 9 (móvel) ou 2 (fixo).\033[0m\n";
+            pausar();
+            continue;
+        }
+
+        // Formatação automática
+        if (valor.find_first_not_of("0123456789") != string::npos) {
+            // Se tinha caracteres especiais, formata padrão
+            valor = numeroLimpo.substr(0, 3) + " " +
+                numeroLimpo.substr(3, 3) + " " +
+                numeroLimpo.substr(6);
         }
         else {
-            valido = true;
-            // Formata opcionalmente o número (91X XXX XXX ou 2XX XXX XXX)
-            if (valor.length() > 9) { // Se usuário digitou com espaços/hífens
-                valor = numeroLimpo.substr(0, 3) + " " +
-                    numeroLimpo.substr(3, 3) + " " +
-                    numeroLimpo.substr(6);
-            }
+            // Se digitou só números, formata com hífen
+            valor = numeroLimpo.substr(0, 3) + "-" +
+                numeroLimpo.substr(3, 3) + "-" +
+                numeroLimpo.substr(6);
         }
-    } while (!valido);
+
+        break; // Saída do loop se tudo válido
+
+    } while (true);
 
     return valor;
 }
 
 string obterMoradaValida(const string& prompt) {
+    const int MIN_CARACTERES = 5;
+    const int MAX_CARACTERES = 100;
     string valor;
-    bool primeiraTentativa = true;
+    int tentativas = 0;
+
+    auto mostrarDicas = [&]() {
+        limparTela();
+        cout << "=== INFORMAÇÕES DE ENDEREÇO ===\n\n";
+        if (tentativas > 0) {
+            cout << "\033[1;33mFORMATO VÁLIDO:\033[0m\n";
+            cout << "- Entre " << MIN_CARACTERES << " e " << MAX_CARACTERES << " caracteres\n";
+            cout << "- Letras, números, espaços e símbolos: , . - / º ª\n";
+            cout << "- \033[3mExemplos: Rua das Flores, 123; Av. Brasil 100-200; Largo do Chiado, 5ºD\033[0m\n\n";
+        }
+        };
 
     do {
-        if (!primeiraTentativa) {
-            cout << "\nDica: A morada deve conter:\n"
-                << "- Pelo menos 5 caracteres\n"
-                << "- Letras, números, espaços e estes símbolos: ,.-/ºª\n"
-                << "- Exemplo válido: Rua das Flores, 123 - 1ºD\n";
-        }
-        primeiraTentativa = false;
+        tentativas++;
+        mostrarDicas();
+        cout << prompt;
+        getline(cin, valor);
 
-        valor = obterString(prompt);
+        valor = normalizarEspacos(valor);
+
+        // Validação em etapas
+        if (valor.empty()) {
+            cout << "\033[31mErro: A morada não pode estar vazia.\033[0m\n";
+            pausar();
+            continue;
+        }
+
+        if (valor.length() < MIN_CARACTERES) {
+            cout << "\033[31mErro: Morada muito curta. Mínimo de " << MIN_CARACTERES
+                << " caracteres.\033[0m\n";
+            pausar();
+            continue;
+        }
+
+        if (valor.length() > MAX_CARACTERES) {
+            cout << "\033[31mErro: Morada muito longa. Máximo de " << MAX_CARACTERES
+                << " caracteres.\033[0m\n";
+            pausar();
+            continue;
+        }
 
         if (!validarMorada(valor)) {
-            cout << "Erro: Morada inválida. Por favor, siga o formato indicado.\n";
+            cout << "\033[31mErro: Contém caracteres inválidos. Use apenas letras, números e ,.-/ºª\033[0m\n";
+            pausar();
+            continue;
         }
-    } while (!validarMorada(valor));
 
-    // Normaliza espaços múltiplos
-    valor = normalizarEspacos(valor);
+        break;
+    } while (true);
+
     return valor;
 }
 
 string obterCidadeValida(const string& prompt) {
+    const int MIN_CARACTERES = 2;
+    const int MAX_CARACTERES = 50;
     string valor;
-    bool primeiraTentativa = true;
+    int tentativas = 0;
+
+    auto mostrarDicas = [&]() {
+        limparTela();
+        cout << "=== INFORMAÇÕES DE LOCALIDADE ===\n\n";
+        if (tentativas > 0) {
+            cout << "\033[1;33mFORMATO VÁLIDO:\033[0m\n";
+            cout << "- Entre " << MIN_CARACTERES << " e " << MAX_CARACTERES << " caracteres\n";
+            cout << "- Apenas letras, espaços e hífens\n";
+            cout << "- \033[3mExemplos: Lisboa, Porto, Vila Nova de Gaia, São João da Madeira\033[0m\n\n";
+        }
+        };
 
     do {
-        if (!primeiraTentativa) {
-            cout << "\nDica: O nome da cidade deve:\n"
-                << "- Conter apenas letras, espaços e hífens\n"
-                << "- Ter entre 2 e 50 caracteres\n"
-                << "- Exemplos válidos: Lisboa, Porto, Vila Nova de Gaia\n";
-        }
-        primeiraTentativa = false;
+        tentativas++;
+        mostrarDicas();
+        cout << prompt;
+        getline(cin, valor);
 
-        valor = obterString(prompt);
-        valor = normalizarNome(valor); // Capitaliza corretamente
+        valor = normalizarNome(normalizarEspacos(valor));
+
+        // Validação em etapas
+        if (valor.empty()) {
+            cout << "\033[31mErro: A cidade não pode estar vazia.\033[0m\n";
+            pausar();
+            continue;
+        }
+
+        if (valor.length() < MIN_CARACTERES) {
+            cout << "\033[31mErro: Nome de cidade muito curto. Mínimo de " << MIN_CARACTERES
+                << " caracteres.\033[0m\n";
+            pausar();
+            continue;
+        }
+
+        if (valor.length() > MAX_CARACTERES) {
+            cout << "\033[31mErro: Nome de cidade muito longo. Máximo de " << MAX_CARACTERES
+                << " caracteres.\033[0m\n";
+            pausar();
+            continue;
+        }
 
         if (!validarCidade(valor)) {
-            cout << "Erro: Cidade inválida. Por favor, siga o formato indicado.\n";
+            cout << "\033[31mErro: Use apenas letras, espaços e hífens.\033[0m\n";
+            pausar();
+            continue;
         }
-    } while (!validarCidade(valor));
+
+        break;
+    } while (true);
 
     return valor;
 }

@@ -3,7 +3,7 @@
 using namespace std; // Usa o namespace padrão para facilitar o acesso a string, vector, etc.
 
 // Construtor padrão da classe Cliente.
-Cliente::Cliente() : id(0) {}
+Cliente::Cliente() : id() {}
 
 // Construtor com parâmetros da classe Cliente.
 Cliente::Cliente(const string& nome, const string& telefone, const string& morada, const string& cidade)

@@ -1,19 +1,24 @@
-#ifndef UTILITARIO_H
-#define UTILITARIO_H
-
+#pragma once
 #include <string>
+#include <iostream>     // Para std::cout, std::cin
+#include <limits>       // Para std::numeric_limits
+#include <sstream>      // Para std::stringstream
+#include <algorithm>    // Para std::replace, std::equal
+#include <cctype>       // Para std::isalpha, std::isdigit, std::tolower
+#include <iomanip>      // Para std::fixed, std::setprecision
 
-// FunÃ§Ãµes utilitÃ¡rias
-void limparBufferEntrada();
-void tratarErroEntrada();
-int obterInt(const std::string& prompt);
-int obterIntPositivo(const std::string& prompt);
-float obterFloat(const std::string& prompt);
-std::string obterString(const std::string& prompt);
-void pausar();
-void limparTela();
+using namespace std;
 
-// Para _getch no Windows
+// Declarações antecipadas das classes para evitar includes desnecessários
+class Loja;
+class Cliente;
+class Produto;
+class Venda;
+
+/*
+ * Configuração para leitura de teclado sem eco (para _getch)
+ * Compatível com Windows (_getch) e Linux/macOS (implementação customizada)
+ */
 #ifdef _WIN32
 #include <conio.h>
 #define GETCH _getch
@@ -25,7 +30,7 @@ inline int getch() {
     int ch;
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
+    newt.c_lflag &= ~(ICANON | ECHO);  // Desativa modo canônico e eco
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
     ch = getchar();
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
@@ -34,33 +39,74 @@ inline int getch() {
 #define GETCH getch
 #endif
 
-// FunÃ§Ãµes de Menu
-class Loja;
-void menuClientes(Loja& loja);
-void menuProdutos(Loja& loja);
+// --------------------------
+// Funções utilitárias gerais
+// --------------------------
+
+/** Limpa o buffer de entrada para evitar problemas com entradas inválidas */
+void limparBufferEntrada();
+
+/** Trata erros de entrada padrão e limpa o buffer */
+void tratarErroEntrada();
+
+/** Obtém um valor inteiro do usuário com tratamento de erros */
+int obterInt(const string& prompt);
+
+/** Obtém um valor inteiro positivo do usuário com tratamento de erros */
+int obterIntPositivo(const string& prompt);
+
+/** Obtém um valor float do usuário com tratamento de erros */
+float obterFloat(const string& prompt);
+
+/** Obtém uma string do usuário (com espaços) */
+string obterString(const string& prompt);
+
+// Função auxiliar para formatar números com 2 casas decimais
+string formatarDecimal(float valor);
+
+/** Pausa a execução e espera por entrada do usuário */
+void pausar();
+
+/** Limpa a tela do console (implementação dependente do sistema) */
+void limparTela();
+
+// --------------------------------------------------
+// Funções para obter entrada validada do usuário 
+// (com loops de repetição até entrada válida)
+// --------------------------------------------------
+
+/** Obtém um nome válido do usuário com repetição até ser válido */
+string obterNomeValido(const string& prompt);
+
+/** Obtém um telefone válido do usuário com repetição até ser válido */
+string obterTelefoneValido(const string& prompt);
+
+/** Obtém uma morada válida do usuário com repetição até ser válida */
+string obterMoradaValida(const string& prompt);
+
+/** Obtém uma cidade válida do usuário com repetição até ser válida */
+string obterCidadeValida(const string& prompt);
+
+// --------------------------
+// Funções auxiliares
+// --------------------------
+
+/** Compara duas strings ignorando diferenças de maiúsculas/minúsculas */
+bool compararStringsIgnorarCase(const string& s1, const string& s2);
+
+// --------------------------
+// Funções de Menu
+// --------------------------
+
+/** Exibe e gerencia o menu de vendas */
 void menuVendas(Loja& loja);
+
+/** Exibe e gerencia o menu de clientes */
+void menuClientes(Loja& loja);
+
+/** Exibe e gerencia o menu de produtos */
+void menuProdutos(Loja& loja);
+
+/** Exibe e gerencia o menu de relatórios */
 void menuRelatorios(Loja& loja);
-
-// FunÃ§Ãµes de ValidaÃ§Ã£o
-bool validarNome(const std::string& nome);
-bool validarTelefone(const std::string& telefone);
-bool validarMorada(const std::string& morada);
-bool validarCidade(const std::string& cidade);
-
-#endif // UTILITARIO_H
-
-
-
-
-bool compararStringsIgnorarCase(const std::string& s1, const std::string& s2);
-
-
-
-
-// FunÃ§Ãµes para obter entrada vÃ¡lida com loops de validaÃ§Ã£o
-std::string obterNomeValido(const std::string& prompt);
-std::string obterTelefoneValido(const std::string& prompt);
-std::string obterMoradaValida(const std::string& prompt);
-std::string obterCidadeValida(const std::string& prompt);
-
 

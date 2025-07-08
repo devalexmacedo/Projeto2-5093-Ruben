@@ -11,7 +11,6 @@ using namespace std;
 
 // Construtor da classe Loja
 Loja::Loja() : proximoIdCliente(1), proximoIdProduto(1), proximoNumeroFatura(1000) {
-    // inicializarDadosIniciais(); // REMOVIDO: Agora é chamado no main.cpp
 }
 
 
@@ -736,7 +735,6 @@ int Loja::adicionarCliente(const string& nome, const string& telefone, const str
     Cliente novoCliente(nome, telefone, morada, cidade);
     novoCliente.setId(proximoIdCliente);
     clientes.push_back(novoCliente);
-    // pausar(); // REMOVIDO: Não é necessário pausar para cada adição inicial
     return proximoIdCliente++;
 }
 

@@ -1,5 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Venda.h"
+#include "utilitario.h"
+#include "constantes.h"
 #include <iostream>   // Para cout, cin
 #include <iomanip>    // Para formatação de saída
 #include <ctime>      // Para manipulação de data/hora
@@ -9,9 +11,6 @@
 
 using namespace std;
 
-// Constantes para configuração
-const float MARGEM_LUCRO = 0.3f;   // Margem de 30% sobre o custo
-const float TAXA_IVA = 0.23f;      // IVA de 23%
 
 // Função auxiliar para calcular o comprimento visível de uma string,
 // útil para alinhamento correto em consoles que usam UTF-8.
@@ -277,7 +276,7 @@ void Venda::imprimirTalao() const {
     cout << "+" << string(largura - 2, '-') << "+" << reset << "                                                                                              " << "\n"; // Reset final.
 
     cout << "\n";
-    system("pause"); // Pausa a execução para o usuário ver o talão.
+    pausar(); // Pausa a execução para o usuário ver o talão.
 }
 
 // Verifica se a venda é "grátis" com base em uma chance aleatória (1 em 4).
